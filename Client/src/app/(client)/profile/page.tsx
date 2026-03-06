@@ -22,49 +22,48 @@ export default function ProfilePage() {
 
     return (
         <div>
-            <div style={{ marginBottom: "2rem" }}>
-                <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a" }}>My Profile</h1>
-                <p style={{ color: "#64748b", fontSize: "0.875rem", marginTop: "0.25rem" }}>View and manage your company account details.</p>
+            <div className="mb-8">
+                <h1 className="text-[1.5rem] font-extrabold text-[#0f172a]">My Profile</h1>
+                <p className="text-[#64748b] text-[0.875rem] mt-1">View and manage your company account details.</p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "320px 1fr", gap: "1.5rem", alignItems: "start" }}>
+            <div className="grid grid-cols-[320px_1fr] gap-6 items-start">
                 {/* Profile Card */}
-                <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #e2e8f0", overflow: "hidden" }}>
-                    <div className="gradient-card" style={{ padding: "2.5rem", textAlign: "center" }}>
-                        <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem", fontSize: "2rem", color: "#fff", fontWeight: 800, border: "3px solid rgba(255,255,255,0.4)" }}>
+                <div className="bg-white rounded-2xl border border-[#e2e8f0] overflow-hidden">
+                    <div className="gradient-card p-10 text-center">
+                        <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4 text-[2rem] text-white font-extrabold border-[3px] border-white/40">
                             {user?.contactPerson?.[0] || "C"}
                         </div>
-                        <h2 style={{ color: "#fff", fontWeight: 800, fontSize: "1rem", letterSpacing: "0.02em" }}>{user?.companyName}</h2>
-                        <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.78rem", marginTop: "0.25rem" }}>{user?.email}</p>
+                        <h2 className="text-white font-extrabold text-[1rem] tracking-[0.02em]">{user?.companyName}</h2>
+                        <p className="text-white/75 text-[0.78rem] mt-1">{user?.email}</p>
                     </div>
-                    <div style={{ padding: "1.5rem" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-                            <div style={{ padding: "0.875rem", background: "#f0f4ff", borderRadius: 10, border: "1px solid #c7d9fd" }}>
-                                <div style={{ fontSize: "0.65rem", fontWeight: 700, color: "#4361ee", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "0.25rem" }}>Client ID</div>
-                                <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0f172a", letterSpacing: "0.05em" }}>{user?.clientId}</div>
+                    <div className="p-6">
+                        <div className="flex flex-col gap-3.5">
+                            <div className="p-3.5 bg-[#f0f4ff] rounded-[10px] border border-[#c7d9fd]">
+                                <div className="text-[0.65rem] font-bold text-[#4361ee] tracking-[0.08em] uppercase mb-1">Client ID</div>
+                                <div className="text-[1.25rem] font-extrabold text-[#0f172a] tracking-[0.05em]">{user?.clientId}</div>
                             </div>
                             <div>
-                                <div style={{ fontSize: "0.7rem", color: "#94a3b8", marginBottom: "0.25rem" }}>Account Status</div>
-                                <span className="badge" style={{ background: "#dcfce7", color: "#16a34a" }}>● Active</span>
+                                <div className="text-[0.7rem] text-[#94a3b8] mb-1">Account Status</div>
+                                <span className="badge bg-[#dcfce7] text-[#16a34a]">● Active</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Details Form */}
-                <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #e2e8f0", padding: "1.75rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-                        <h2 style={{ fontWeight: 700, fontSize: "1rem", color: "#0f172a" }}>Company Details</h2>
+                <div className="bg-white rounded-2xl border border-[#e2e8f0] p-7">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="font-bold text-[1rem] text-[#0f172a]">Company Details</h2>
                         <button
                             onClick={() => editing ? handleSave() : setEditing(true)}
-                            className={editing ? "btn-primary" : "btn-outline-dark"}
-                            style={{ padding: "0.4rem 1.125rem", fontSize: "0.78rem" }}
+                            className={`${editing ? "btn-primary" : "btn-outline-dark"} py-1.5 px-4.5 text-[0.78rem]`}
                         >
                             {editing ? "💾 Save Changes" : "✏️ Edit"}
                         </button>
                     </div>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+                    <div className="grid grid-cols-2 gap-5">
                         {[
                             { label: "Company Name", name: "companyName" },
                             { label: "Contact Person", name: "contactPerson" },
@@ -74,33 +73,31 @@ export default function ProfilePage() {
                             <div key={name} className="form-group">
                                 <label className="form-label">{label}</label>
                                 <input
-                                    className="form-input"
+                                    className={`form-input focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] outline-none ${editing ? "bg-[#f8fafc] cursor-text" : "bg-[#f1f5f9] cursor-not-allowed"}`}
                                     value={form[name as keyof typeof form]}
                                     onChange={(e) => setForm((p) => ({ ...p, [name]: e.target.value }))}
                                     disabled={!editing}
-                                    style={{ background: editing ? "#f8fafc" : "#f1f5f9", cursor: editing ? "text" : "not-allowed" }}
                                 />
                             </div>
                         ))}
-                        <div className="form-group" style={{ gridColumn: "span 2" }}>
+                        <div className="form-group col-span-2">
                             <label className="form-label">Business Address</label>
                             <input
-                                className="form-input"
+                                className={`form-input focus:ring-2 focus:ring-[#1a56db] focus:border-[#1a56db] outline-none ${editing ? "bg-[#f8fafc] cursor-text" : "bg-[#f1f5f9] cursor-not-allowed"}`}
                                 value={form.address}
                                 onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
                                 disabled={!editing}
-                                style={{ background: editing ? "#f8fafc" : "#f1f5f9", cursor: editing ? "text" : "not-allowed" }}
                             />
                         </div>
                     </div>
 
                     {/* Contact Admin */}
-                    <div style={{ marginTop: "1.75rem", padding: "1.25rem", background: "#f8fafc", borderRadius: 10, border: "1px solid #e2e8f0" }}>
-                        <h3 style={{ fontWeight: 700, fontSize: "0.875rem", color: "#0f172a", marginBottom: "0.5rem" }}>Need to change your password?</h3>
-                        <p style={{ color: "#64748b", fontSize: "0.78rem", lineHeight: 1.6 }}>Passwords are managed by admin. Please contact us via WhatsApp to reset your Client ID or password.</p>
+                    <div className="mt-7 p-5 bg-[#f8fafc] rounded-[10px] border border-[#e2e8f0]">
+                        <h3 className="font-bold text-[0.875rem] text-[#0f172a] mb-2">Need to change your password?</h3>
+                        <p className="text-[#64748b] text-[0.78rem] leading-[1.6]">Passwords are managed by admin. Please contact us via WhatsApp to reset your Client ID or password.</p>
                         <button
-                            onClick={() => window.open("https://wa.me/97798XXXXXXXX?text=Hello%20Admin%2C%20I%20need%20help%20with%20my%20account%20%28Client%20ID%3A%20" + user?.clientId + "%29", "_blank")}
-                            style={{ marginTop: "0.875rem", padding: "0.5rem 1.125rem", background: "#25D366", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: "0.78rem", cursor: "pointer" }}
+                            onClick={() => window.open(`https://wa.me/97798XXXXXXXX?text=Hello%20Admin%2C%20I%20need%20help%20with%20my%20account%20%28Client%20ID%3A%20${user?.clientId}%29`, "_blank")}
+                            className="mt-3.5 py-2 px-4.5 bg-[#25D366] text-white border-none rounded-lg font-bold text-[0.78rem] cursor-pointer hover:bg-[#20bd5a] transition-colors"
                         >
                             💬 Contact Admin on WhatsApp
                         </button>

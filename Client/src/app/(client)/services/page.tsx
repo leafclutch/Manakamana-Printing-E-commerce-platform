@@ -5,47 +5,40 @@ import { SERVICES } from "@/constants";
 
 export default function ServicesPage() {
     return (
-        <div>
-            <div style={{ marginBottom: "2rem" }}>
-                <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a" }}>Printing Services</h1>
-                <p style={{ color: "#64748b", fontSize: "0.875rem", marginTop: "0.25rem" }}>
+        <div className="py-10 px-10">
+            <div className="mb-8 flex flex-col items-center">
+                <h2 className="text-4xl font-bold">Printing Services</h2>
+                <div className="divider mt-2 h-[4px] rounded-full w-32 bg-blue-500 my-4" />
+                <p className="max-w-[50%] text-center text-[#64748b] text-[0.875rem] mt-1">
                     Choose from our range of premium printing services. All prices are wholesale B2B rates.
                 </p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
                 {SERVICES.map((service) => (
-                    <div key={service.id} className="card">
+                    <div key={service.id} className="card cursor-pointer">
                         {/* Preview image / icon area */}
-                        <div style={{
-                            background: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)",
-                            height: 160, display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: "3.5rem", position: "relative"
-                        }}>
+                        <div className="bg-gradient-to-br from-[#f1f5f9] to-[#e2e8f0] h-[160px] flex items-center justify-center text-[3.5rem] relative">
                             {service.icon}
-                            <span style={{
-                                position: "absolute", top: 10, left: 10,
-                                background: "linear-gradient(90deg,#e91e8c,#9c27b0)",
-                                color: "#fff", borderRadius: "50px",
-                                padding: "3px 10px", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.06em"
-                            }}>B2B</span>
+                            <span className="absolute top-2.5 left-2.5 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-mid)] text-white rounded-[50px] px-2.5 py-[3px] text-[0.6rem] font-bold tracking-[0.06em]">
+                                B2B
+                            </span>
                         </div>
 
-                        <div style={{ padding: "1.25rem" }}>
-                            <h3 style={{ fontWeight: 700, fontSize: "1rem", marginBottom: "0.375rem" }}>{service.name}</h3>
-                            <p style={{ fontSize: "0.8rem", color: "#64748b", lineHeight: 1.6, marginBottom: "0.875rem" }}>{service.description}</p>
+                        <div className="p-5">
+                            <h3 className="font-bold text-base mb-1.5">{service.name}</h3>
+                            <p className="text-[0.8rem] text-[#64748b] leading-[1.6] mb-3.5">{service.description}</p>
 
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+                            <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <div style={{ fontSize: "0.65rem", color: "#94a3b8", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Minimum Quantity</div>
-                                    <div style={{ fontWeight: 700, color: "#0f172a", fontSize: "0.9rem" }}>{service.minimumQuantity.toLocaleString()} pcs</div>
+                                    <div className="text-[0.65rem] text-[#94a3b8] font-semibold tracking-[0.08em] uppercase">Minimum Quantity</div>
+                                    <div className="font-bold text-[#0f172a] text-[0.9rem]">{service.minimumQuantity.toLocaleString()} pcs</div>
                                 </div>
                             </div>
 
                             <Link
                                 href={`/orders/create?service=${encodeURIComponent(service.name)}`}
-                                className="btn-primary"
-                                style={{ width: "100%", textAlign: "center", display: "block", padding: "0.625rem" }}
+                                className="btn-primary w-full text-center block p-2.5"
                             >
                                 Create Order
                             </Link>

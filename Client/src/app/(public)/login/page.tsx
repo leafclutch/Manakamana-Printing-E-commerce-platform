@@ -44,22 +44,25 @@ export default function LoginPage() {
     return (
         <>
             <Navbar />
-            <div style={{ background: "#f0f4ff", minHeight: "calc(100vh - 64px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem 1rem" }}>
-                <div style={{
-                    display: "grid", gridTemplateColumns: "1fr 1fr",
-                    maxWidth: 860, width: "100%",
-                    background: "#fff", borderRadius: 20,
-                    boxShadow: "0 20px 60px rgba(0,0,0,0.12)", overflow: "hidden"
-                }}>
-
-                    {/* ── Left: Form ── */}
-                    <div style={{ padding: "2.5rem 2.5rem", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                        <div style={{ marginBottom: "2rem" }}>
-                            <h1 style={{ fontSize: "1.875rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.375rem" }}>Welcome!</h1>
-                            <p style={{ color: "#64748b", fontSize: "0.875rem" }}>Log in to access your dashboard.</p>
+            <div className="bg-[#f0f4ff] min-h-[calc(100vh-64px)] flex items-center justify-center py-8 px-2 sm:px-4">
+                {/* Responsive Wrapper */}
+                <div
+                    className={`
+                        max-w-[860px] w-full
+                        bg-white rounded-[20px]
+                        shadow-[0_20px_60px_rgba(0,0,0,0.12)]
+                        overflow-hidden
+                        flex flex-col
+                        md:grid md:grid-cols-2
+                    `}
+                >
+                    {/* Left: Form */}
+                    <div className="p-6 sm:p-10 flex flex-col justify-center">
+                        <div className="mb-7 sm:mb-8">
+                            <h1 className="text-[1.5rem] sm:text-[1.875rem] font-extrabold text-[#0f172a] mb-1.5">Welcome!</h1>
+                            <p className="text-[#64748b] text-[0.92rem] sm:text-[0.875rem]">Log in to access your dashboard.</p>
                         </div>
-
-                        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                             <div className="form-group">
                                 <label className="form-label">Client ID</label>
                                 <input
@@ -71,84 +74,69 @@ export default function LoginPage() {
                                     autoComplete="username"
                                 />
                             </div>
-
                             <div className="form-group">
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <label className="form-label">Password</label>
-                                    <button type="button" style={{ background: "none", border: "none", color: "#1a56db", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer" }}>
+                                <div className="flex justify-between items-center mb-1">
+                                    <label className="form-label mb-0">Password</label>
+                                    <button type="button" className="bg-transparent border-none text-[#1a56db] text-[0.78rem] font-semibold cursor-pointer">
                                         Forgot?
                                     </button>
                                 </div>
-                                <div style={{ position: "relative" }}>
+                                <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="Enter your password"
-                                        className="form-input"
+                                        className="form-input pr-12"
                                         autoComplete="current-password"
-                                        style={{ paddingRight: "3rem" }}
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        style={{ position: "absolute", right: "0.875rem", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#94a3b8", fontSize: "1rem" }}
+                                        className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-[#94a3b8] text-base"
                                     >
                                         {showPassword ? "🙈" : "👁️"}
                                     </button>
                                 </div>
                             </div>
-
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="btn-primary"
-                                style={{ width: "100%", padding: "0.875rem", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.08em", opacity: loading ? 0.7 : 1 }}
+                                className="btn-primary w-full p-3.5 text-[0.875rem] font-bold tracking-[0.08em]"
+                                style={{ opacity: loading ? 0.7 : 1 }}
                             >
                                 {loading ? "SIGNING IN…" : "SIGN IN"}
                             </button>
                         </form>
-
-                        <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.78rem", color: "#64748b" }}>
-                            Demo: <strong style={{ color: "#0f172a" }}>CL102</strong> / <strong style={{ color: "#0f172a" }}>manakamana123</strong>
+                        <p className="text-center mt-4 sm:mt-6 text-[0.78rem] text-[#64748b]">
+                            Demo: <strong className="text-[#0f172a]">CL102</strong> / <strong className="text-[#0f172a]">manakamana123</strong>
                         </p>
                     </div>
-
-                    {/* ── Right: Gradient Panel ── */}
-                    <div className="gradient-card" style={{ padding: "2.5rem 2rem", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", overflow: "hidden" }}>
+                    {/* Right: Gradient Panel */}
+                    <div className="gradient-card p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden">
                         {/* Decorative blob */}
-                        <div style={{ position: "absolute", bottom: -40, right: -40, width: 180, height: 180, borderRadius: "50%", background: "rgba(255,255,255,0.06)", pointerEvents: "none" }} />
-
+                        <div className="absolute -bottom-10 -right-10 w-[110px] sm:w-[150px] md:w-[180px] h-[110px] sm:h-[150px] md:h-[180px] rounded-full bg-white/[0.06] pointer-events-none" />
                         <div>
-                            <h2 style={{ color: "#fff", fontSize: "1.35rem", fontWeight: 800, letterSpacing: "0.02em", marginBottom: "1.75rem" }}>NEW USER?</h2>
-                            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                            <h2 className="text-white text-[1.08rem] sm:text-[1.25rem] md:text-[1.35rem] font-extrabold tracking-[0.02em] mb-5 sm:mb-7">
+                                NEW USER?
+                            </h2>
+                            <div className="flex flex-col gap-4 sm:gap-5">
                                 {features.map((f) => (
-                                    <div key={f.title} style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
-                                        <div style={{
-                                            width: 42, height: 42, borderRadius: 10,
-                                            background: "rgba(255,255,255,0.15)", display: "flex",
-                                            alignItems: "center", justifyContent: "center",
-                                            fontSize: "1.1rem", flexShrink: 0
-                                        }}>{f.icon}</div>
+                                    <div key={f.title} className="flex gap-3 sm:gap-4 items-start">
+                                        <div className="w-[38px] sm:w-[42px] h-[38px] sm:h-[42px] rounded-[10px] bg-white/[0.15] flex items-center justify-center text-[1.1rem] shrink-0">
+                                            {f.icon}
+                                        </div>
                                         <div>
-                                            <h3 style={{ color: "#fff", fontWeight: 700, fontSize: "0.9rem", marginBottom: "0.2rem" }}>{f.title}</h3>
-                                            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.78rem", lineHeight: 1.6 }}>{f.desc}</p>
+                                            <h3 className="text-white font-bold text-[0.89rem] sm:text-[0.9rem] mb-1">{f.title}</h3>
+                                            <p className="text-white/75 text-[0.78rem] leading-[1.6]">{f.desc}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
-
                         <Link
                             href="/register"
-                            style={{
-                                display: "block", marginTop: "2rem",
-                                border: "2px solid rgba(255,255,255,0.7)", borderRadius: "50px",
-                                padding: "0.75rem", textAlign: "center",
-                                color: "#fff", fontWeight: 700, fontSize: "0.85rem",
-                                letterSpacing: "0.08em", textDecoration: "none",
-                                transition: "all 0.2s"
-                            }}
+                            className="block mt-6 sm:mt-8 border-2 border-white/70 rounded-[50px] p-2.5 sm:p-3 text-center text-white font-bold text-[0.84rem] sm:text-[0.85rem] tracking-[0.08em] no-underline transition-all duration-200 hover:bg-white/10"
                         >
                             CREATE ACCOUNT
                         </Link>
@@ -156,6 +144,21 @@ export default function LoginPage() {
                 </div>
             </div>
             <Footer />
+            {/* Inline styles for extra safety if Tailwind config is lacking */}
+            <style jsx global>{`
+                @media (max-width: 850px) {
+                    .gradient-card {
+                        border-top-left-radius: 0 !important;
+                        border-bottom-left-radius: 0 !important;
+                    }
+                }
+                @media (max-width: 767px) {
+                    .gradient-card {
+                        border-radius: 0 0 20px 20px !important;
+                        min-height: unset !important;
+                    }
+                }
+            `}</style>
         </>
     );
 }

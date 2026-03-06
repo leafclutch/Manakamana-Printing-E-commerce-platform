@@ -73,86 +73,92 @@ export default function RegisterPage() {
     return (
         <>
             <Navbar />
-            <div style={{ background: "#f0f4ff", minHeight: "calc(100vh - 64px)", padding: "2.5rem 1rem" }}>
-                <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    maxWidth: 900, margin: "0 auto",
-                    background: "#fff", borderRadius: 20,
-                    boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
-                    overflow: "hidden"
-                }}>
-
+            <div className="bg-[#f0f4ff] min-h-[calc(100vh-64px)] py-10 px-2 sm:px-4">
+                <div
+                    className={`
+                        max-w-[900px] w-full mx-auto bg-white rounded-[20px]
+                        shadow-[0_20px_60px_rgba(0,0,0,0.12)] overflow-hidden
+                        flex flex-col md:flex-row
+                    `}
+                >
                     {/* ── Left: Gradient Panel ── */}
-                    <div className="gradient-card" style={{ padding: "2.5rem 2rem", display: "flex", flexDirection: "column", justifyContent: "space-between", position: "relative", overflow: "hidden" }}>
-                        <div style={{ position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.06)", pointerEvents: "none" }} />
+                    <div
+                        className={`
+                            gradient-card
+                            p-7 sm:p-10
+                            flex flex-col justify-between relative overflow-hidden
+                            md:w-1/2 w-full
+                            min-h-[340px]
+                        `}
+                    >
+                        <div className="absolute -top-[60px] -right-[60px] w-[160px] sm:w-[200px] h-[160px] sm:h-[200px] rounded-full bg-white/[0.06] pointer-events-none" />
 
                         <div>
-                            <div style={{ marginBottom: "2rem" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.5rem" }}>
-                                    <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem" }}>🖨️</div>
+                            <div className="mb-8">
+                                <div className="flex items-center gap-2.5 mb-6">
+                                    <div className="w-[38px] h-[38px] rounded-[10px] bg-white/20 flex items-center justify-center text-[1.2rem]">🖨️</div>
                                     <div>
-                                        <div style={{ color: "#fff", fontSize: "0.9rem", fontWeight: 800, letterSpacing: "0.05em" }}>MANAKAMANA</div>
-                                        <div style={{ color: "rgba(255,255,255,0.65)", fontSize: "0.6rem", letterSpacing: "0.15em" }}>PRINTING PRESS</div>
+                                        <div className="text-white text-[0.9rem] font-extrabold tracking-[0.05em]">MANAKAMANA</div>
+                                        <div className="text-white/[0.65] text-[0.6rem] tracking-[0.15em]">PRINTING PRESS</div>
                                     </div>
                                 </div>
-                                <h2 style={{ color: "#fff", fontSize: "1.5rem", fontWeight: 800, marginBottom: "0.5rem" }}>Join Our B2B Network</h2>
-                                <p style={{ color: "rgba(255,255,255,0.78)", fontSize: "0.82rem", lineHeight: 1.7 }}>
+                                <h2 className="text-white text-[1.18rem] sm:text-[1.5rem] font-extrabold mb-2">Join Our B2B Network</h2>
+                                <p className="text-white/[0.78] text-[0.8rem] sm:text-[0.82rem] leading-[1.7]">
                                     Register your company and get access to exclusive wholesale printing rates and premium templates.
                                 </p>
                             </div>
 
-                            <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}>
+                            <div className="flex flex-col gap-4.5">
                                 {benefits.map((b) => (
-                                    <div key={b.title} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
-                                        <div style={{ width: 38, height: 38, borderRadius: 8, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", flexShrink: 0 }}>{b.icon}</div>
+                                    <div key={b.title} className="flex gap-3 items-start">
+                                        <div className="w-[36px] sm:w-[38px] h-[36px] sm:h-[38px] rounded-lg bg-white/[0.15] flex items-center justify-center text-base shrink-0">{b.icon}</div>
                                         <div>
-                                            <h3 style={{ color: "#fff", fontWeight: 700, fontSize: "0.85rem", marginBottom: "0.15rem" }}>{b.title}</h3>
-                                            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.75rem", lineHeight: 1.5 }}>{b.desc}</p>
+                                            <h3 className="text-white font-bold text-[0.82rem] sm:text-[0.85rem] mb-0.5">{b.title}</h3>
+                                            <p className="text-white/70 text-[0.73rem] sm:text-[0.75rem] leading-[1.5]">{b.desc}</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        <div style={{ marginTop: "2rem" }}>
-                            <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.78rem", marginBottom: "0.625rem" }}>Already have an account?</p>
-                            <Link href="/login" style={{
-                                display: "block", border: "2px solid rgba(255,255,255,0.7)", borderRadius: "50px",
-                                padding: "0.625rem", textAlign: "center", color: "#fff",
-                                fontWeight: 700, fontSize: "0.82rem", letterSpacing: "0.08em", textDecoration: "none"
-                            }}>SIGN IN</Link>
+                        <div className="mt-8">
+                            <p className="text-white/70 text-[0.77rem] sm:text-[0.78rem] mb-2.5">Already have an account?</p>
+                            <Link
+                                href="/login"
+                                className="block border-2 border-white/70 rounded-[50px] p-2.5 text-center text-white font-bold text-[0.81rem] sm:text-[0.82rem] tracking-[0.08em] no-underline hover:bg-white/10 transition-colors"
+                            >
+                                SIGN IN
+                            </Link>
                         </div>
                     </div>
 
                     {/* ── Right: Form ── */}
-                    <div style={{ padding: "2.5rem 2.25rem", overflowY: "auto" }}>
+                    <div className="p-7 sm:p-10 sm:px-9 w-full md:w-1/2 overflow-y-auto max-h-[750px] custom-scrollbar">
                         {submitted ? (
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", textAlign: "center" }}>
-                                <div style={{ fontSize: "3.5rem", marginBottom: "1.25rem" }}>💬</div>
-                                <h2 style={{ fontWeight: 800, fontSize: "1.25rem", marginBottom: "0.75rem", color: "#0f172a" }}>Request Prepared!</h2>
-                                <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.7, maxWidth: 280 }}>
+                            <div className="flex flex-col items-center justify-center min-h-[360px] text-center">
+                                <div className="text-[3.2rem] sm:text-[3.5rem] mb-5">💬</div>
+                                <h2 className="font-extrabold text-[1.18rem] sm:text-[1.25rem] mb-3 text-[#0f172a]">Request Prepared!</h2>
+                                <p className="text-[#64748b] text-[0.86rem] sm:text-[0.875rem] leading-[1.7] max-w-[280px]">
                                     Your registration details have been prepared. WhatsApp should open shortly to send your request to admin.
                                 </p>
                                 <button
                                     onClick={() => setSubmitted(false)}
-                                    className="btn-primary"
-                                    style={{ marginTop: "1.5rem" }}
+                                    className="btn-primary mt-6"
                                 >
                                     Submit Another Request
                                 </button>
-                                <Link href="/login" style={{ marginTop: "0.75rem", color: "#1a56db", fontSize: "0.82rem", textDecoration: "none", fontWeight: 600 }}>
+                                <Link href="/login" className="mt-3 text-[#1a56db] text-[0.8rem] sm:text-[0.82rem] no-underline font-semibold hover:underline">
                                     Go to Login →
                                 </Link>
                             </div>
                         ) : (
                             <>
-                                <div style={{ marginBottom: "1.75rem" }}>
-                                    <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", marginBottom: "0.375rem" }}>Create Account</h1>
-                                    <p style={{ color: "#64748b", fontSize: "0.82rem" }}>Fill in your company details to register.</p>
+                                <div className="mb-7">
+                                    <h1 className="text-[1.27rem] sm:text-[1.5rem] font-extrabold text-[#0f172a] mb-1.5">Create Account</h1>
+                                    <p className="text-[#64748b] text-[0.8rem] sm:text-[0.82rem]">Fill in your company details to register.</p>
                                 </div>
 
-                                <form onSubmit={handleSubmit} noValidate style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                                <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
                                     {/* Company Name */}
                                     <div className="form-group">
                                         <label className="form-label">Company Name *</label>
@@ -164,7 +170,7 @@ export default function RegisterPage() {
                                             className="form-input"
                                             style={{ borderColor: errors.companyName ? "#ef4444" : undefined }}
                                         />
-                                        {errors.companyName && <span style={{ color: "#ef4444", fontSize: "0.72rem" }}>{errors.companyName}</span>}
+                                        {errors.companyName && <span className="text-[#ef4444] text-[0.72rem] mt-1">{errors.companyName}</span>}
                                     </div>
 
                                     {/* Contact Person */}
@@ -178,11 +184,11 @@ export default function RegisterPage() {
                                             className="form-input"
                                             style={{ borderColor: errors.contactPerson ? "#ef4444" : undefined }}
                                         />
-                                        {errors.contactPerson && <span style={{ color: "#ef4444", fontSize: "0.72rem" }}>{errors.contactPerson}</span>}
+                                        {errors.contactPerson && <span className="text-[#ef4444] text-[0.72rem] mt-1">{errors.contactPerson}</span>}
                                     </div>
 
                                     {/* Phone + Email */}
-                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.875rem" }}>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                         <div className="form-group">
                                             <label className="form-label">Phone Number *</label>
                                             <input
@@ -193,7 +199,7 @@ export default function RegisterPage() {
                                                 className="form-input"
                                                 style={{ borderColor: errors.phone ? "#ef4444" : undefined }}
                                             />
-                                            {errors.phone && <span style={{ color: "#ef4444", fontSize: "0.72rem" }}>{errors.phone}</span>}
+                                            {errors.phone && <span className="text-[#ef4444] text-[0.72rem] mt-1">{errors.phone}</span>}
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Email Address *</label>
@@ -206,7 +212,7 @@ export default function RegisterPage() {
                                                 className="form-input"
                                                 style={{ borderColor: errors.email ? "#ef4444" : undefined }}
                                             />
-                                            {errors.email && <span style={{ color: "#ef4444", fontSize: "0.72rem" }}>{errors.email}</span>}
+                                            {errors.email && <span className="text-[#ef4444] text-[0.72rem] mt-1">{errors.email}</span>}
                                         </div>
                                     </div>
 
@@ -221,7 +227,7 @@ export default function RegisterPage() {
                                             className="form-input"
                                             style={{ borderColor: errors.address ? "#ef4444" : undefined }}
                                         />
-                                        {errors.address && <span style={{ color: "#ef4444", fontSize: "0.72rem" }}>{errors.address}</span>}
+                                        {errors.address && <span className="text-[#ef4444] text-[0.72rem] mt-1">{errors.address}</span>}
                                     </div>
 
                                     {/* Printing Requirements */}
@@ -232,21 +238,19 @@ export default function RegisterPage() {
                                             value={form.printingNeeds}
                                             onChange={handleChange}
                                             placeholder="Describe your printing needs (e.g. visiting cards, letterheads, pamphlets…)"
-                                            className="form-input"
+                                            className="form-input resize-y"
                                             rows={3}
-                                            style={{ resize: "vertical" }}
                                         />
                                     </div>
 
                                     <button
                                         type="submit"
-                                        className="btn-primary"
-                                        style={{ padding: "0.875rem", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.06em", marginTop: "0.25rem" }}
+                                        className="btn-primary p-3.5 text-[0.865rem] sm:text-[0.875rem] font-bold tracking-[0.06em] mt-1"
                                     >
                                         💬 SEND REGISTRATION VIA WHATSAPP
                                     </button>
 
-                                    <p style={{ textAlign: "center", color: "#94a3b8", fontSize: "0.7rem", lineHeight: 1.5 }}>
+                                    <p className="text-center text-[#94a3b8] text-[0.69rem] sm:text-[0.7rem] leading-[1.5] mt-2">
                                         By registering, admin will review your request and provide your Client ID and password via WhatsApp.
                                     </p>
                                 </form>
@@ -256,6 +260,40 @@ export default function RegisterPage() {
                 </div>
             </div>
             <Footer />
+            {/* Responsive support for card & layout on mobile/tablet */}
+            <style jsx global>{`
+                .gradient-card {
+                    background: linear-gradient(135deg, #2b3a66 65%, #6786df 100%);
+                }
+                @media (max-width: 900px) {
+                    .gradient-card {
+                        min-height: unset !important;
+                    }
+                }
+                @media (max-width: 900px) {
+                    .gradient-card {
+                        border-radius: 20px 20px 0 0 !important;
+                    }
+                }
+                @media (max-width: 767px) {
+                    .gradient-card {
+                        border-radius: 0 0 16px 16px !important;
+                        padding: 1.7rem 1.1rem !important;
+                    }
+                }
+                @media (max-width: 900px) {
+                    /* Stack the columns for md breakpoint and below: flex -> flex-col */
+                    .max-w-\[900px\] {
+                        flex-direction: column !important;
+                    }
+                }
+                @media (max-width: 600px) {
+                    .max-w-\[900px\] {
+                        border-radius: 0 !important;
+                        box-shadow: none !important;
+                    }
+                }
+            `}</style>
         </>
     );
 }

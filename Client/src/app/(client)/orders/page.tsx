@@ -29,26 +29,25 @@ export default function OrdersPage() {
     return (
         <div>
             {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.75rem", flexWrap: "wrap", gap: "1rem" }}>
+            <div className="flex items-center justify-between mb-7 flex-wrap gap-4">
                 <div>
-                    <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a" }}>Order History</h1>
-                    <p style={{ color: "#64748b", fontSize: "0.875rem", marginTop: "0.25rem" }}>Track all your printing orders and their current status.</p>
+                    <h1 className="text-[1.5rem] font-extrabold text-[#0f172a]">Order History</h1>
+                    <p className="text-[#64748b] text-[0.875rem] mt-1">Track all your printing orders and their current status.</p>
                 </div>
                 <Link href="/orders/create" className="btn-primary">➕ New Order</Link>
             </div>
 
             {/* Filters */}
-            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "1.25rem", alignItems: "center" }}>
+            <div className="flex gap-3 flex-wrap mb-5 items-center">
                 {/* Search */}
-                <div style={{ position: "relative" }}>
-                    <span style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "#94a3b8", fontSize: "0.9rem" }}>🔍</span>
+                <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] text-[0.9rem]">🔍</span>
                     <input
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search orders…"
-                        className="form-input"
-                        style={{ paddingLeft: "2.25rem", width: 220, padding: "0.5rem 0.875rem 0.5rem 2.25rem" }}
+                        className="form-input w-[220px] pl-9 py-2 pr-3.5"
                     />
                 </div>
                 {/* Status filter chips */}
@@ -56,13 +55,10 @@ export default function OrdersPage() {
                     <button
                         key={f.value}
                         onClick={() => setStatusFilter(f.value)}
-                        style={{
-                            padding: "0.35rem 0.875rem", borderRadius: "50px",
-                            border: statusFilter === f.value ? "none" : "1.5px solid #e2e8f0",
-                            background: statusFilter === f.value ? "linear-gradient(90deg,#1a56db,#2563eb)" : "#fff",
-                            color: statusFilter === f.value ? "#fff" : "#475569",
-                            fontWeight: 600, fontSize: "0.72rem", cursor: "pointer"
-                        }}
+                        className={`py-1.5 px-3.5 rounded-[50px] font-semibold text-[0.72rem] cursor-pointer ${statusFilter === f.value
+                                ? "border-none bg-gradient-to-r from-[#1a56db] to-[#2563eb] text-white"
+                                : "border-[1.5px] border-[#e2e8f0] bg-white text-[#475569] hover:bg-gray-50"
+                            }`}
                     >
                         {f.label}
                     </button>
@@ -70,52 +66,52 @@ export default function OrdersPage() {
             </div>
 
             {/* Table */}
-            <div className="table-container">
-                <table className="data-table">
+            <div className="table-container bg-white rounded-2xl border border-[#e2e8f0] overflow-hidden">
+                <table className="data-table w-full border-collapse">
                     <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Order Name</th>
-                            <th>Service</th>
-                            <th>Quantity</th>
-                            <th>Paper / Finish</th>
-                            <th>Status</th>
-                            <th>Date</th>
+                        <tr className="bg-[#f8fafc] border-b border-[#e2e8f0] text-[#64748b] text-left text-[0.78rem] uppercase tracking-[0.04em]">
+                            <th className="p-4 font-bold">Order ID</th>
+                            <th className="p-4 font-bold">Order Name</th>
+                            <th className="p-4 font-bold">Service</th>
+                            <th className="p-4 font-bold">Quantity</th>
+                            <th className="p-4 font-bold">Paper / Finish</th>
+                            <th className="p-4 font-bold">Status</th>
+                            <th className="p-4 font-bold">Date</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-[#e2e8f0]">
                         {filtered.length === 0 ? (
                             <tr>
-                                <td colSpan={7} style={{ textAlign: "center", padding: "3rem", color: "#94a3b8" }}>
+                                <td colSpan={7} className="text-center p-12 text-[#94a3b8]">
                                     No orders found
                                 </td>
                             </tr>
                         ) : filtered.map((order) => (
-                            <tr key={order.id}>
-                                <td style={{ color: "#1a56db", fontWeight: 700, fontSize: "0.8rem" }}>{order.id}</td>
-                                <td style={{ fontWeight: 600 }}>{order.orderName}</td>
-                                <td>
-                                    <div style={{ fontSize: "0.82rem" }}>{order.service}</div>
-                                    <div style={{ fontSize: "0.68rem", color: "#94a3b8", marginTop: "0.1rem" }}>{order.orderType}</div>
+                            <tr key={order.id} className="hover:bg-[#f8fafc] transition-colors">
+                                <td className="p-4 text-[#1a56db] font-bold text-[0.8rem]">{order.id}</td>
+                                <td className="p-4 font-semibold text-[#0f172a]">{order.orderName}</td>
+                                <td className="p-4">
+                                    <div className="text-[0.82rem] text-[#0f172a]">{order.service}</div>
+                                    <div className="text-[0.68rem] text-[#94a3b8] mt-0.5">{order.orderType}</div>
                                 </td>
-                                <td style={{ color: "#475569" }}>{order.quantity.toLocaleString()}</td>
-                                <td>
-                                    <div style={{ fontSize: "0.78rem" }}>{order.paperType}</div>
-                                    <div style={{ fontSize: "0.68rem", color: "#94a3b8" }}>{order.finishingOption}</div>
+                                <td className="p-4 text-[#475569]">{order.quantity.toLocaleString()}</td>
+                                <td className="p-4">
+                                    <div className="text-[0.78rem] text-[#0f172a]">{order.paperType}</div>
+                                    <div className="text-[0.68rem] text-[#94a3b8]">{order.finishingOption}</div>
                                 </td>
-                                <td>
+                                <td className="p-4">
                                     <span className={`badge ${getStatusColor(order.status as OrderStatus)}`}>
                                         {getStatusLabel(order.status as OrderStatus)}
                                     </span>
                                 </td>
-                                <td style={{ color: "#64748b", fontSize: "0.82rem" }}>{formatDate(order.date)}</td>
+                                <td className="p-4 text-[#64748b] text-[0.82rem]">{formatDate(order.date)}</td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
 
-            <p style={{ textAlign: "right", marginTop: "0.875rem", fontSize: "0.72rem", color: "#94a3b8" }}>
+            <p className="text-right mt-3.5 text-[0.72rem] text-[#94a3b8]">
                 Showing {filtered.length} of {MOCK_ORDERS.length} orders
             </p>
         </div>

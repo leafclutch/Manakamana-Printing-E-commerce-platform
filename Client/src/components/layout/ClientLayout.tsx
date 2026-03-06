@@ -21,9 +21,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     if (!isAuthenticated) return null;
 
     return (
-        <div style={{ minHeight: "100vh", background: "#f8fafc", display: "flex", flexDirection: "column" }}>
+        <div className="min-h-screen bg-[#f8fafc] flex flex-col">
             <Navbar />
-            <main style={{ flex: 1 }}>
+            <main className="flex-1">
                 {children}
             </main>
             <Footer />

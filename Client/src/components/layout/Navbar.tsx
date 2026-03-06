@@ -5,12 +5,14 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { notify } from "@/utils/notifications";
+import { AnimatePresence, easeInOut, motion } from 'motion/react'
 
 export default function Navbar() {
     const { isAuthenticated, logout } = useAuth();
     const pathname = usePathname();
     const router = useRouter();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false)
 
     const handleLogout = () => {
         logout();
@@ -22,37 +24,49 @@ export default function Navbar() {
         { href: "/", label: "Home" },
         { href: "/services", label: "Our Services" },
         { href: "/templates", label: "Free Designs" },
-        { href: "/#how-it-works", label: "Corporate" },
-        { href: "/#contact", label: "Contact" },
+        { href: "/contact", label: "Contact" },
     ];
 
     return (
-        <nav className="navbar">
-            <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 1.5rem", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
+        <nav className="bg-white shadow-[0_1px_0_var(--border)] sticky top-0 z-[100]">
+            <div className="w-full mx-auto px-4 sm:px-8 md:px-20 flex items-center justify-between h-16">
                 {/* Logo */}
-                <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none" }}>
-                    <div style={{
-                        width: 38, height: 38, borderRadius: 10,
-                        background: "linear-gradient(135deg, #1a56db 0%, #2563eb 100%)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        color: "#fff", fontSize: "1.1rem", fontWeight: 900, letterSpacing: "-0.02em",
-                        boxShadow: "0 2px 8px rgba(26,86,219,0.3)"
-                    }}>
+                <Link
+                    href="/"
+                    className="flex items-center gap-2.5 no-underline"
+                >
+                    <div
+                        className="w-9 h-9 rounded-[10px] bg-gradient-to-br from-[#1a56db] to-[#2563eb] flex items-center justify-center text-white text-lg font-black tracking-tight shadow-[0_2px_8px_rgba(26,86,219,0.3)]"
+                    >
                         🖨️
                     </div>
                     <div>
-                        <div className="navbar-logo-text">MANAKAMANA</div>
-                        <div className="navbar-logo-sub">Printing Press</div>
+                        <div className="text-base font-extrabold tracking-wider text-[color:var(--primary)] leading-[1]">
+                            MANAKAMANA
+                        </div>
+                        <div className="text-[0.55rem] font-medium tracking-widest uppercase text-[color:var(--text-muted)]">
+                            Printing Press
+                        </div>
                     </div>
                 </Link>
 
                 {/* Desktop Nav */}
-                <div style={{ display: "flex", alignItems: "center", gap: "2rem" }} className="hidden md:flex">
+                <div className="hidden md:flex items-center gap-8">
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`nav-link ${pathname === link.href ? "active" : ""}`}
+                            className={`
+                                font-medium
+                                text-[0.875rem]
+                                py-1
+                                transition-colors
+                                duration-200
+                                hover:text-[var(--primary)]
+                                hover:border-[var(--primary)]
+                                ${pathname === link.href ? "text-[var(--primary)] border-b-2 border-[var(--primary)]" : ""}
+                                `}
+
                         >
                             {link.label}
                         </Link>
@@ -60,48 +74,121 @@ export default function Navbar() {
                 </div>
 
                 {/* Actions */}
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <button className="dark-toggle" title="Toggle dark mode">🌙</button>
+                <div className="flex items-center gap-3">
+                    <button className="dark-toggle" title="Toggle dark mode">
+                        🌙
+                    </button>
                     {isAuthenticated ? (
-                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                            <Link href="/orders" className="btn-outline-dark" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem" }}>
-                                Orders
-                            </Link>
-                            <Link href="/profile" className="btn-outline-dark" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem" }}>
-                                Profile
-                            </Link>
-                            <button onClick={handleLogout} className="btn-primary" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem", background: "#ef4444" }}>
-                                Logout
-                            </button>
+                        <div className="flex gap-2 items-center">
+
+                            <div
+                                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                                className="border border-blue-500 cursor-pointer h-10 w-10 flex items-center justify-center border-2 rounded-full text-xl font-bold "
+                            >
+                                P
+                            </div>
                         </div>
                     ) : (
-                        <Link href="/login" className="btn-primary">Login</Link>
+                        <Link href="/login" className="btn-primary">
+                            Login
+                        </Link>
                     )}
-
                     {/* Mobile menu */}
                     <button
                         onClick={() => setMenuOpen(!menuOpen)}
-                        style={{ display: "none", background: "none", border: "none", cursor: "pointer", fontSize: "1.25rem", padding: "0.25rem" }}
-                        className="mobile-menu-btn"
+                        className="md:hidden bg-transparent border-none cursor-pointer text-xl p-1"
                     >
                         {menuOpen ? "✕" : "☰"}
                     </button>
                 </div>
             </div>
 
+            <AnimatePresence>
+                {isProfileOpen && (
+                    <motion.div
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -10, opacity: 0 }}
+                        transition={{ duration: 0.35, ease: "easeInOut" }}
+                        className="absolute right-6 top-16 z-[150] mt-2 rounded-xl shadow-xl py-4 px-6 min-w-[200px] flex flex-col gap-3 border border-gray-200 bg-white">
+                        <Link
+                            href="/profile"
+                            className="py-2 px-2 font-semibold text-[color:var(--primary)] rounded hover:bg-[var(--primary-light)] transition-colors cursor-pointer"
+                            onClick={() => setIsProfileOpen(false)}
+                        >
+                            Profile
+                        </Link>
+                        <Link
+                            href="/orders"
+                            className="py-2 px-2 font-semibold text-blue-600 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                            onClick={() => setIsProfileOpen(false)}
+                        >
+                            Order History
+                        </Link>
+                        <button
+                            onClick={() => {
+                                setIsProfileOpen(false);
+                                handleLogout();
+                            }}
+                            className="py-2 px-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600 transition-colors cursor-pointer"
+                        >
+                            Logout
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             {/* Mobile Menu */}
             {menuOpen && (
-                <div style={{
-                    background: "#fff", borderTop: "1px solid #e2e8f0",
-                    padding: "1rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.75rem"
-                }}>
+                <div className="bg-white border-t border-gray-200 px-6 py-4 flex flex-col gap-3">
                     {navLinks.map((link) => (
-                        <Link key={link.href} href={link.href} className="nav-link" onClick={() => setMenuOpen(false)}>
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setMenuOpen(false)}
+                            className={
+                                `
+                                    font-medium 
+                                    text-[0.875rem] 
+                                    py-1 
+                                    text-[color:var(--text-dark)]
+                                    transition-colors
+                                    duration-200
+                                    no-underline
+                                    border-b-2
+                                    border-transparent
+                                    hover:text-[color:var(--primary)]
+                                    hover:border-[color:var(--primary)]
+                                    ${pathname === link.href
+                                    ? "text-[color:var(--primary)] border-[color:var(--primary)]"
+                                    : ""
+                                }
+                                `
+                            }
+                        >
                             {link.label}
                         </Link>
                     ))}
                     {!isAuthenticated && (
-                        <Link href="/register" className="nav-link" onClick={() => setMenuOpen(false)}>Join Us</Link>
+                        <Link
+                            href="/register"
+                            className="
+                                font-medium 
+                                text-[0.875rem] 
+                                py-1 
+                                text-[color:var(--text-dark)]
+                                transition-colors
+                                duration-200
+                                no-underline
+                                border-b-2
+                                border-transparent
+                                hover:text-[color:var(--primary)]
+                                hover:border-[color:var(--primary)]
+                            "
+                            onClick={() => setMenuOpen(false)}
+                        >
+                            Join Us
+                        </Link>
                     )}
                 </div>
             )}
