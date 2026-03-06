@@ -64,8 +64,11 @@ export default function Navbar() {
                     <button className="dark-toggle" title="Toggle dark mode">🌙</button>
                     {isAuthenticated ? (
                         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                            <Link href="/dashboard" className="btn-outline-dark" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem" }}>
-                                Dashboard
+                            <Link href="/orders" className="btn-outline-dark" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem" }}>
+                                Orders
+                            </Link>
+                            <Link href="/profile" className="btn-outline-dark" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem" }}>
+                                Profile
                             </Link>
                             <button onClick={handleLogout} className="btn-primary" style={{ padding: "0.4rem 1rem", fontSize: "0.8rem", background: "#ef4444" }}>
                                 Logout
