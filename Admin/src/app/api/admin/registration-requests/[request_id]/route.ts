@@ -29,8 +29,8 @@ async function toJsonResponse(apiResponse: Response) {
 }
 
 export async function GET(
-  _request: Request,
-  { params }: { params: { request_id: string } }
+  request: Request,
+  context: { params: Promise<{ request_id: string }> }
 ) {
   const token = await getAuthToken();
   if (!token) {
@@ -40,7 +40,7 @@ export async function GET(
     );
   }
 
-  const { request_id } = await params;
+  const { request_id } = await context.params;
   const apiResponse = await fetch(
     `${API_BASE_URL}/admin/registration-requests/${request_id}`,
     {

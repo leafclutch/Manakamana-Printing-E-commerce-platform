@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   LayoutDashboard,
   UserPlus,
@@ -16,10 +17,13 @@ import {
 
 const navItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Registration Requests", href: "/registration-requests", icon: UserPlus },
+  {
+    title: "Registration Requests",
+    href: "/registration-requests",
+    icon: UserPlus,
+  },
   { title: "Order Management", href: "/orders", icon: Package },
   { title: "Design Approval", href: "/design-approval", icon: CheckCircle },
-  { title: "Template Library", href: "/template-library", icon: Library },
 ];
 
 export function Sidebar() {
@@ -36,12 +40,20 @@ export function Sidebar() {
     <aside className="flex h-screen w-64 shrink-0 flex-col bg-[#0F172A]">
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-white/[0.06]">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0061FF] shadow-lg shadow-blue-600/30">
-          <Printer className="h-5 w-5 text-white" />
-        </div>
-        <div>
-          <h1 className="text-sm font-bold tracking-tight text-white">MANAKAMANA</h1>
-          <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Print Admin</p>
+          <Image
+            src="/main-logo.png"
+            alt="Manakamana Logo"
+            width={50}
+            height={50}
+            className="object-contain p-1"
+          />
+        <div className="min-w-0">
+          <h1 className="text-sm font-bold tracking-tight text-white truncate">
+            MANAKAMANA
+          </h1>
+          <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest truncate">
+            Print Admin
+          </p>
         </div>
       </div>
 
@@ -60,13 +72,15 @@ export function Sidebar() {
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
                 isActive
                   ? "bg-[#0061FF] text-white shadow-md shadow-blue-600/20"
-                  : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200"
+                  : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200",
               )}
             >
               <item.icon
                 className={cn(
                   "h-4.5 w-4.5 shrink-0 transition-colors",
-                  isActive ? "text-white" : "text-slate-500 group-hover:text-slate-300"
+                  isActive
+                    ? "text-white"
+                    : "text-slate-500 group-hover:text-slate-300",
                 )}
               />
               <span className="truncate">{item.title}</span>
@@ -86,13 +100,15 @@ export function Sidebar() {
             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150",
             pathname === "/settings"
               ? "bg-[#0061FF] text-white shadow-md shadow-blue-600/20"
-              : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200"
+              : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200",
           )}
         >
           <Settings
             className={cn(
               "h-4.5 w-4.5 shrink-0",
-              pathname === "/settings" ? "text-white" : "text-slate-500 group-hover:text-slate-300"
+              pathname === "/settings"
+                ? "text-white"
+                : "text-slate-500 group-hover:text-slate-300",
             )}
           />
           <span>Settings</span>
@@ -113,7 +129,9 @@ export function Sidebar() {
             }}
           />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-slate-200">Admin User</p>
+            <p className="truncate text-xs font-semibold text-slate-200">
+              Admin User
+            </p>
             <p className="truncate text-[10px] text-slate-500">Super Admin</p>
           </div>
           <button

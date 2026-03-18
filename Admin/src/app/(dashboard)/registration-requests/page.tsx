@@ -1,28 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import {
+  approveRegistrationRequest,
+  fetchRegistrationRequests,
+  rejectRegistrationRequest,
+  type RegistrationRequestUi,
+} from "@/services/registrationRequestsService";
 import {
   Search,
   Filter,
   CheckCircle,
   XCircle,
-  Eye,
   Building2,
   Mail,
   Phone,
   Calendar,
+  User,
 } from "lucide-react";
-
-const initialRequests = [
-  { id: "REG-2024-001", companyName: "Himalayan Java Coffee", contactPerson: "Gagan Pradhan", email: "gagan@himalayanjava.com", phone: "+977 9801234567", date: "2024-03-10", status: "Pending", type: "Corporate" },
-  { id: "REG-2024-002", companyName: "Bhatbhateni Supermarket", contactPerson: "Min Bahadur Gurung", email: "info@bbsm.com.np", phone: "+977 01-4412345", date: "2024-03-09", status: "Approved", type: "Retail" },
-  { id: "REG-2024-003", companyName: "WorldLink Communications", contactPerson: "Dileep Agrawal", email: "corporate@worldlink.com.np", phone: "+977 9801555555", date: "2024-03-08", status: "Rejected", type: "ISP" },
-  { id: "REG-2024-004", companyName: "Goldstar Shoes", contactPerson: "Kiran Kumar Shrestha", email: "sales@goldstar.com.np", phone: "+977 9851000000", date: "2024-03-08", status: "Pending", type: "Manufacturing" },
-  { id: "REG-2024-005", companyName: "Pathao Nepal", contactPerson: "Asheems Man Singh Basnyat", email: "partners@pathao.com", phone: "+977 9801900000", date: "2024-03-07", status: "Pending", type: "Tech" },
-];
 
 const STATUS_STYLES: Record<string, { badge: string; dot: string }> = {
   Approved: { badge: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400", dot: "bg-emerald-500" },
@@ -32,17 +38,84 @@ const STATUS_STYLES: Record<string, { badge: string; dot: string }> = {
 
 export default function RegistrationRequestsPage() {
   const { toast } = useToast();
-  const [requests, setRequests] = useState(initialRequests);
+  const [requests, setRequests] = useState<RegistrationRequestUi[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState<RegistrationRequestUi | null>(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [actionId, setActionId] = useState<string | null>(null);
 
-  const handleApprove = (id: string) => {
-    setRequests(requests.map((req) => req.id === id ? { ...req, status: "Approved" } : req));
-    toast({ title: "Request Approved ✓", description: `Registration ${id} approved.` });
+  const loadRequests = async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const data = await fetchRegistrationRequests();
+      setRequests(data);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to load registration requests.";
+      setLoadError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleReject = (id: string) => {
-    setRequests(requests.map((req) => req.id === id ? { ...req, status: "Rejected" } : req));
-    toast({ title: "Request Rejected", description: `Registration ${id} rejected.`, variant: "destructive" });
+  useEffect(() => {
+    loadRequests();
+  }, []);
+
+  const handleApprove = async (id: string) => {
+    setActionId(id);
+    try {
+      const result = await approveRegistrationRequest(id);
+      setRequests((prev) =>
+        prev.map((req) => (req.id === id ? { ...req, status: "Approved" } : req))
+      );
+      const credentials = result.credentials
+        ? `Client ID: ${result.credentials.client_id}, Password: ${result.credentials.password}`
+        : "Registration approved.";
+      toast({
+        title: "Request Approved",
+        description: credentials,
+      });
+      setIsViewOpen(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to approve request.";
+      toast({ title: "Approval Failed", description: message, variant: "destructive" });
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    setActionId(id);
+    try {
+      await rejectRegistrationRequest(id);
+      setRequests((prev) =>
+        prev.map((req) => (req.id === id ? { ...req, status: "Rejected" } : req))
+      );
+      toast({
+        title: "Request Rejected",
+        description: `Registration ${id} rejected.`,
+        variant: "destructive",
+      });
+      setIsViewOpen(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to reject request.";
+      toast({ title: "Rejection Failed", description: message, variant: "destructive" });
+    } finally {
+      setActionId(null);
+    }
+  };
+
+  const openReviewDialog = (req: RegistrationRequestUi) => {
+    setSelectedRequest(req);
+    setIsViewOpen(true);
   };
 
   const filteredRequests = requests.filter(
@@ -96,6 +169,17 @@ export default function RegistrationRequestsPage() {
         ))}
       </div>
 
+      {loadError ? (
+        <Card className="border border-red-200 bg-red-50">
+          <CardContent className="flex flex-col items-start gap-2 p-4 text-sm text-red-700">
+            <span>{loadError}</span>
+            <Button size="sm" variant="outline" onClick={loadRequests}>
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+
       {/* Table */}
       <Card>
         <CardHeader className="border-b border-slate-100 dark:border-slate-800">
@@ -126,7 +210,13 @@ export default function RegistrationRequestsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {filteredRequests.length === 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-12 text-center">
+                      <p className="text-sm text-slate-500">Loading requests...</p>
+                    </td>
+                  </tr>
+                ) : filteredRequests.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-5 py-12 text-center">
                       <div className="flex flex-col items-center gap-2 text-slate-400">
@@ -138,7 +228,7 @@ export default function RegistrationRequestsPage() {
                 ) : filteredRequests.map((req) => {
                   const s = STATUS_STYLES[req.status];
                   return (
-                    <tr key={req.id} className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                    <tr key={req.id} className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer" onClick={() => openReviewDialog(req)}>
                       <td className="px-5 py-4 font-mono text-xs font-semibold text-slate-600 dark:text-slate-400">{req.id}</td>
                       <td className="px-5 py-4">
                         <div className="flex flex-col gap-0.5">
@@ -169,17 +259,34 @@ export default function RegistrationRequestsPage() {
                         <div className="flex justify-end gap-1">
                           {req.status === "Pending" && (
                             <>
-                              <Button size="icon" variant="ghost" className="h-8 w-8 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-900/20" onClick={() => handleApprove(req.id)} title="Approve">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-900/20"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleApprove(req.id);
+                                }}
+                                title="Approve"
+                                disabled={actionId === req.id}
+                              >
                                 <CheckCircle className="h-4 w-4" />
                               </Button>
-                              <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20" onClick={() => handleReject(req.id)} title="Reject">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReject(req.id);
+                                }}
+                                title="Reject"
+                                disabled={actionId === req.id}
+                              >
                                 <XCircle className="h-4 w-4" />
                               </Button>
                             </>
                           )}
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-slate-600" title="View Details">
-                            <Eye className="h-4 w-4" />
-                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -190,6 +297,96 @@ export default function RegistrationRequestsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Review Dialog */}
+      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Review Registration</DialogTitle>
+            <DialogDescription>
+              Details for request ID: {selectedRequest?.id}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedRequest && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-4 rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/40">
+                  <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">{selectedRequest.companyName}</h3>
+                  <p className="text-sm text-slate-500">{selectedRequest.type}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center">
+                  <User className="mr-3 h-4 w-4 text-slate-400" />
+                  <span className="font-medium text-slate-600 dark:text-slate-400">Contact Person:</span>
+                  <span className="ml-auto font-semibold text-slate-900 dark:text-white">{selectedRequest.contactPerson}</span>
+                </div>
+                <div className="flex items-center">
+                  <Mail className="mr-3 h-4 w-4 text-slate-400" />
+                  <span className="font-medium text-slate-600 dark:text-slate-400">Email:</span>
+                  <span className="ml-auto font-semibold text-slate-900 dark:text-white">{selectedRequest.email}</span>
+                </div>
+                <div className="flex items-center">
+                  <Phone className="mr-3 h-4 w-4 text-slate-400" />
+                  <span className="font-medium text-slate-600 dark:text-slate-400">Phone:</span>
+                  <span className="ml-auto font-semibold text-slate-900 dark:text-white">{selectedRequest.phone}</span>
+                </div>
+                <div className="flex items-center">
+                  <Calendar className="mr-3 h-4 w-4 text-slate-400" />
+                  <span className="font-medium text-slate-600 dark:text-slate-400">Request Date:</span>
+                  <span className="ml-auto font-semibold text-slate-900 dark:text-white">{selectedRequest.date}</span>
+                </div>
+                {selectedRequest.address ? (
+                  <div className="flex items-center">
+                    <Building2 className="mr-3 h-4 w-4 text-slate-400" />
+                    <span className="font-medium text-slate-600 dark:text-slate-400">Address:</span>
+                    <span className="ml-auto font-semibold text-slate-900 dark:text-white">{selectedRequest.address}</span>
+                  </div>
+                ) : null}
+                {selectedRequest.message ? (
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+                    <span className="font-semibold text-slate-700 dark:text-slate-200">Message: </span>
+                    {selectedRequest.message}
+                  </div>
+                ) : null}
+                 <div className="flex items-center">
+                  <div className={`mr-3 h-4 w-4 text-slate-400 ${STATUS_STYLES[selectedRequest.status]?.dot}`} />
+                  <span className="font-medium text-slate-600 dark:text-slate-400">Status:</span>
+                  <span className={`ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[selectedRequest.status]?.badge}`}>
+                    {selectedRequest.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:justify-end">
+            <Button variant="outline" onClick={() => setIsViewOpen(false)}>Close</Button>
+            {selectedRequest?.status === "Pending" && (
+              <>
+                <Button
+                  variant="destructive"
+                  className="gap-2 bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
+                  onClick={() => selectedRequest && handleReject(selectedRequest.id)}
+                  disabled={actionId === selectedRequest.id}
+                >
+                  <XCircle className="h-4 w-4" /> Reject
+                </Button>
+                <Button
+                  className="gap-2 bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+                  onClick={() => selectedRequest && handleApprove(selectedRequest.id)}
+                  disabled={actionId === selectedRequest.id}
+                >
+                  <CheckCircle className="h-4 w-4" /> Approve
+                </Button>
+              </>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -29,8 +29,8 @@ async function toJsonResponse(apiResponse: Response) {
 }
 
 export async function POST(
-  _request: Request,
-  context: { params: Promise<{ request_id: string }> } 
+  request: Request,
+  context: { params: Promise<{ request_id: string }> }
 ) {
   const token = await getAuthToken();
   if (!token) {

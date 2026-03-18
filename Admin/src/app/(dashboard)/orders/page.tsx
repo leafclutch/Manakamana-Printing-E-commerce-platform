@@ -19,13 +19,14 @@ import {
   Search,
   Filter,
   Plus,
-  MoreHorizontal,
+  Eye,
   Package,
   Clock,
   CheckCircle2,
   AlertCircle,
   Printer,
   Truck,
+  ArrowRight,
 } from "lucide-react";
 
 const initialOrders = [
@@ -37,6 +38,8 @@ const initialOrders = [
   { id: "ORD-7726", client: "Daraz Nepal", service: "Packaging Boxes", amount: "NPR 120,000", date: "2024-03-06", dueDate: "2024-03-25", status: "Placed", priority: "High" },
   { id: "ORD-7727", client: "Pathao", service: "Rider Vests", amount: "NPR 55,000", date: "2024-03-05", dueDate: "2024-03-18", status: "Ready", priority: "Medium" },
 ];
+
+type Order = typeof initialOrders[0];
 
 const STATUS_STYLES: Record<string, string> = {
   Placed: "bg-slate-100 text-slate-700 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-300",
@@ -65,6 +68,8 @@ export default function OrderManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [isNewOrderOpen, setIsNewOrderOpen] = useState(false);
+  const [isReviewOrderOpen, setIsReviewOrderOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [newOrder, setNewOrder] = useState({ client: "", service: "", amount: "", priority: "Medium", dueDate: "" });
 
   const handleCreateOrder = (e: React.FormEvent) => {
@@ -80,6 +85,17 @@ export default function OrderManagementPage() {
     setNewOrder({ client: "", service: "", amount: "", priority: "Medium", dueDate: "" });
     toast({ title: "Order Created", description: `Order ${order.id} for ${order.client} created.` });
   };
+  
+  const handleUpdateStatus = (orderId: string, newStatus: string) => {
+    setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    toast({ title: "Order Status Updated", description: `Order ${orderId} is now ${newStatus}.` });
+    setIsReviewOrderOpen(false);
+  };
+
+  const openReviewDialog = (order: Order) => {
+    setSelectedOrder(order);
+    setIsReviewOrderOpen(true);
+  };
 
   const filteredOrders = orders.filter((o) => {
     const matchesSearch =
@@ -94,6 +110,14 @@ export default function OrderManagementPage() {
     active: orders.filter((o) => ["Placed", "Designing", "Processing", "Printing"].includes(o.status)).length,
     ready: orders.filter((o) => o.status === "Ready").length,
     delivered: orders.filter((o) => o.status === "Delivered").length,
+  };
+
+  const nextStatusMap: Record<string, string> = {
+    Placed: "Designing",
+    Designing: "Processing",
+    Processing: "Printing",
+    Printing: "Ready",
+    Ready: "Delivered",
   };
 
   return (
@@ -129,7 +153,7 @@ export default function OrderManagementPage() {
                   <Label htmlFor={f.id}>{f.label}</Label>
                   <Input
                     id={f.id} type={f.type} value={f.value} required
-                    onChange={(e) => setNewOrder({ ...newOrder, [f.field]: e.target.value })}
+                    onChange={(e) => setNewOrder({ ...newOrder, [f.field as keyof typeof newOrder]: e.target.value })}
                   />
                 </div>
               ))}
@@ -275,8 +299,8 @@ export default function OrderManagementPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
-                      <Button size="icon" variant="ghost" className="h-7 w-7 opacity-0 group-hover:opacity-100">
-                        <MoreHorizontal className="h-4 w-4" />
+                      <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-400 hover:text-slate-600" title="View Details" onClick={() => openReviewDialog(order)}>
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </td>
                   </tr>
@@ -286,6 +310,66 @@ export default function OrderManagementPage() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Review Order Dialog */}
+      <Dialog open={isReviewOrderOpen} onOpenChange={setIsReviewOrderOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+            <DialogDescription>
+              Review and manage order <span className="font-mono">{selectedOrder?.id}</span>
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between rounded-lg bg-slate-50 p-4 dark:bg-slate-800">
+                <div>
+                    <p className="text-sm text-slate-500">Client</p>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">{selectedOrder.client}</h3>
+                </div>
+                <div>
+                    <p className="text-sm text-slate-500 text-right">Amount</p>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">{selectedOrder.amount}</h3>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <p><strong className="font-medium text-slate-500">Service:</strong> {selectedOrder.service}</p>
+                <p><strong className="font-medium text-slate-500">Priority:</strong> {selectedOrder.priority}</p>
+                <p><strong className="font-medium text-slate-500">Order Date:</strong> {selectedOrder.date}</p>
+                <p><strong className="font-medium text-slate-500">Due Date:</strong> {selectedOrder.dueDate}</p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[selectedOrder.status]}`}>
+                    {selectedOrder.status}
+                </span>
+                {nextStatusMap[selectedOrder.status] && (
+                  <>
+                    <ArrowRight className="h-4 w-4 text-slate-400" />
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[nextStatusMap[selectedOrder.status]]}`}>
+                        {nextStatusMap[selectedOrder.status]}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter className="gap-2 sm:justify-end">
+            <Button variant="outline" onClick={() => setIsReviewOrderOpen(false)}>Close</Button>
+            {selectedOrder && nextStatusMap[selectedOrder.status] && (
+                <Button className="gap-2" onClick={() => handleUpdateStatus(selectedOrder.id, nextStatusMap[selectedOrder.status])}>
+                  Move to {nextStatusMap[selectedOrder.status]} <ArrowRight className="h-4 w-4" />
+                </Button>
+            )}
+             {selectedOrder && selectedOrder.status !== 'Cancelled' && (
+                <Button variant="destructive" className="gap-2" onClick={() => handleUpdateStatus(selectedOrder.id, "Cancelled")}>
+                    Cancel Order
+                </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
