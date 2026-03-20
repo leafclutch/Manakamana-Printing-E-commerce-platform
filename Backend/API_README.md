@@ -172,3 +172,115 @@ Updates the request to indicate that the credentials have been communicated to t
 ## 🏥 Health Check
 - **Endpoint**: `GET /`
 - **Response**: `{"message": "API is running"}`
+
+---
+
+## 🎨 Templates (Client)
+
+### Get Template Categories
+- **Endpoint**: `GET /templates/categories`
+- **Header**: `Authorization: Bearer <CLIENT_TOKEN>`
+- **Response**: `{"success": true, "data": [{"id": "...", "name": "...", "slug": "..."}]}`
+
+### Get Templates List
+- **Endpoint**: `GET /templates`
+- **Query Params**: `category` (slug), `page`, `limit`, `search`
+- **Header**: `Authorization: Bearer <CLIENT_TOKEN>`
+
+### Get Single Template Detail
+- **Endpoint**: `GET /templates/:templateId`
+- **Header**: `Authorization: Bearer <CLIENT_TOKEN>`
+
+---
+
+## 📥 Design Submissions (Client)
+
+### Submit Design
+- **Endpoint**: `POST /design-submissions`
+- **Header**: `Authorization: Bearer <CLIENT_TOKEN>`
+- **Content-Type**: `multipart/form-data`
+- **Request Body (Form Data)**:
+  - `file`: (File, required) The design file (PDF, PNG, JPG, JPEG)
+  - `templateId`: (String, optional) ID of the template used
+  - `title`: (String, optional) Title for the design
+  - `notes`: (String, optional) Any additional notes
+
+### Get My Submissions List
+- **Endpoint**: `GET /design-submissions/my`
+- **Query Params**: `status` (PENDING_REVIEW, APPROVED, REJECTED), `page`, `limit`
+- **Header**: `Authorization: Bearer <CLIENT_TOKEN>`
+
+### Get My Single Submission Detail
+- **Endpoint**: `GET /design-submissions/my/:submissionId`
+- **Header**: `Authorization: Bearer <CLIENT_TOKEN>`
+
+### Get My Approved Design by Design ID
+- **Endpoint**: `GET /my-designs/:designId`
+- **Header**: `Authorization: Bearer <CLIENT_TOKEN>`
+
+### Verify Design ID
+- **Endpoint**: `POST /designs/verify`
+- **Header**: `Authorization: Bearer <CLIENT_TOKEN>`
+- **Request Body**:
+  ```json
+  {
+    "designId": "DSN-2026-000001"
+  }
+  ```
+
+---
+
+## 👩‍💻 Design Submissions (Admin)
+
+### Get Design Submissions List
+- **Endpoint**: `GET /admin/design-submissions`
+- **Query Params**: `status`, `clientId`, `page`, `limit`, `sort`
+- **Header**: `Authorization: Bearer <ADMIN_TOKEN>`
+
+### Get Single Submission Detail
+- **Endpoint**: `GET /admin/design-submissions/:submissionId`
+- **Header**: `Authorization: Bearer <ADMIN_TOKEN>`
+
+### Approve a Design Submission
+- **Endpoint**: `POST /admin/design-submissions/:submissionId/approve`
+- **Header**: `Authorization: Bearer <ADMIN_TOKEN>`
+- **Request Body**:
+  ```json
+  {
+    "previewUrl": "https://example.com/preview.jpg",
+    "note": "Approved for printing"
+  }
+  ```
+
+### Reject a Design Submission
+- **Endpoint**: `PATCH /admin/design-submissions/:submissionId/reject`
+- **Header**: `Authorization: Bearer <ADMIN_TOKEN>`
+- **Request Body**:
+  ```json
+  {
+    "feedbackMessage": "Margin too small, please keep text inside the safe area."
+  }
+  ```
+
+---
+
+## 🏛️ Approved Designs (Admin)
+
+### Get Approved Designs List
+- **Endpoint**: `GET /admin/designs`
+- **Query Params**: `status` (ACTIVE, ARCHIVED), `clientId`, `search`, `page`, `limit`
+- **Header**: `Authorization: Bearer <ADMIN_TOKEN>`
+
+### Get Approved Design Detail
+- **Endpoint**: `GET /admin/designs/:designId`
+- **Header**: `Authorization: Bearer <ADMIN_TOKEN>`
+
+### Archive Approved Design
+- **Endpoint**: `PATCH /admin/designs/:designId/archive`
+- **Header**: `Authorization: Bearer <ADMIN_TOKEN>`
+- **Request Body**:
+  ```json
+  {
+    "reason": "Obsolete design or client request"
+  }
+  ```

@@ -1,0 +1,194 @@
+{
+  "info": {
+    "name": "Manakamana Printing Design APIs",
+    "description": "Postman Collection for Design Submission and Approval Workflow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Client",
+      "item": [
+        {
+          "name": "Templates",
+          "item": [
+            {
+              "name": "Get Categories",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/templates/categories", "host": ["{{baseUrl}}"], "path": ["templates", "categories"] }
+              }
+            },
+            {
+              "name": "Get Templates",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/templates", "host": ["{{baseUrl}}"], "path": ["templates"] }
+              }
+            },
+            {
+              "name": "Get Single Template",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/templates/:templateId", "host": ["{{baseUrl}}"], "path": ["templates", ":templateId"], "variable": [{"key": "templateId", "value": "uuid"}] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Design Submissions",
+          "item": [
+            {
+              "name": "Submit Design",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    { "key": "file", "type": "file" },
+                    { "key": "templateId", "value": "", "type": "text" },
+                    { "key": "title", "value": "My Design", "type": "text" }
+                  ]
+                },
+                "url": { "raw": "{{baseUrl}}/design-submissions", "host": ["{{baseUrl}}"], "path": ["design-submissions"] }
+              }
+            },
+            {
+              "name": "Get My Submissions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/design-submissions/my", "host": ["{{baseUrl}}"], "path": ["design-submissions", "my"] }
+              }
+            },
+            {
+              "name": "Get My Submission By ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/design-submissions/my/:submissionId", "host": ["{{baseUrl}}"], "path": ["design-submissions", "my", ":submissionId"], "variable": [{"key": "submissionId", "value": "uuid"}] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Approved Designs",
+          "item": [
+            {
+              "name": "Get My Design By ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/my-designs/:designId", "host": ["{{baseUrl}}"], "path": ["my-designs", ":designId"], "variable": [{"key": "designId", "value": "DSN-xxx"}] }
+              }
+            },
+            {
+              "name": "Verify Design ID",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"designId\": \"DSN-2026-000001\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/designs/verify", "host": ["{{baseUrl}}"], "path": ["designs", "verify"] }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Design Submissions",
+          "item": [
+            {
+              "name": "Get Submissions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/admin/design-submissions", "host": ["{{baseUrl}}"], "path": ["admin", "design-submissions"] }
+              }
+            },
+            {
+              "name": "Get Submission Detail",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/admin/design-submissions/:submissionId", "host": ["{{baseUrl}}"], "path": ["admin", "design-submissions", ":submissionId"], "variable": [{"key": "submissionId", "value": "uuid"}] }
+              }
+            },
+            {
+              "name": "Approve Submission",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"previewUrl\": \"https://example.com/preview.jpg\",\n  \"note\": \"Approved\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/design-submissions/:submissionId/approve", "host": ["{{baseUrl}}"], "path": ["admin", "design-submissions", ":submissionId", "approve"], "variable": [{"key": "submissionId", "value": "uuid"}] }
+              }
+            },
+            {
+              "name": "Reject Submission",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"feedbackMessage\": \"Margin too small\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/design-submissions/:submissionId/reject", "host": ["{{baseUrl}}"], "path": ["admin", "design-submissions", ":submissionId", "reject"], "variable": [{"key": "submissionId", "value": "uuid"}] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Approved Designs",
+          "item": [
+            {
+              "name": "Get All Designs",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/admin/designs", "host": ["{{baseUrl}}"], "path": ["admin", "designs"] }
+              }
+            },
+            {
+              "name": "Get Design Detail",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": { "raw": "{{baseUrl}}/admin/designs/:designId", "host": ["{{baseUrl}}"], "path": ["admin", "designs", ":designId"], "variable": [{"key": "designId", "value": "DSN-xxx"}] }
+              }
+            },
+            {
+              "name": "Archive Design",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Obsolete\"\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/admin/designs/:designId/archive", "host": ["{{baseUrl}}"], "path": ["admin", "designs", ":designId", "archive"], "variable": [{"key": "designId", "value": "DSN-xxx"}] }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8005/api/v1"
+    }
+  ]
+}

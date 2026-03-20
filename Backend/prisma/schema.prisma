@@ -24,24 +24,34 @@ enum OrderStatus {
   ORDER_CANCELLED
 }
 
-enum DesignStatus {
-  PENDING
+enum DesignSubmissionStatus {
+  PENDING_REVIEW
   APPROVED
   REJECTED
+}
+
+enum ApprovedDesignStatus {
+  ACTIVE
+  ARCHIVED
 }
 
 // ADMIN USERS
 
 model AdminUser {
-  id       String    @id @default(uuid())
+  id       String @id @default(uuid())
   name     String
-  email    String    @unique
-  password String    // PLAIN TEXT STORED AS REQUESTED
-  role     String    @default("ADMIN")
+  email    String @unique
+  password String // PLAIN TEXT STORED AS REQUESTED
+  role     String @default("ADMIN")
 
   reviewedRegistrationRequests RegistrationRequest[] @relation("ApprovedBy")
   rejectedRegistrationRequests RegistrationRequest[] @relation("RejectedBy")
   credentialsSentRequests      RegistrationRequest[] @relation("CredentialsSentBy")
+
+  reviewedSubmissions DesignSubmission[] @relation("ReviewedSubmissions")
+  approvedDesigns     ApprovedDesign[]   @relation("ApprovedDesigns")
+  archivedDesigns     ApprovedDesign[]   @relation("ArchivedDesigns")
+  auditLogs           AuditLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -52,28 +62,28 @@ model AdminUser {
 // REGISTRATION REQUEST (CLIENT ONBOARDING)
 
 model RegistrationRequest {
-  id                      String  @id @default(uuid())
-  business_name           String
-  owner_name              String
-  email                   String
-  phone_number            String @unique
-  business_address        String?
-  notes                   String?
+  id               String  @id @default(uuid())
+  business_name    String
+  owner_name       String
+  email            String
+  phone_number     String  @unique
+  business_address String?
+  notes            String?
 
-  status RegistrationStatus @default(PENDING)
+  status           RegistrationStatus @default(PENDING)
   rejection_reason String?
 
   approved_by_id String?
-  approved_by   AdminUser? @relation("ApprovedBy", fields: [approved_by_id], references: [id])
+  approved_by    AdminUser? @relation("ApprovedBy", fields: [approved_by_id], references: [id])
   approved_at    DateTime?
 
   rejected_by_id String?
-  rejected_by   AdminUser? @relation("RejectedBy", fields: [rejected_by_id], references: [id])
+  rejected_by    AdminUser? @relation("RejectedBy", fields: [rejected_by_id], references: [id])
   rejected_at    DateTime?
 
-  credentials_sent_at DateTime?
+  credentials_sent_at    DateTime?
   credentials_sent_by_id String?
-  credentials_sent_by AdminUser? @relation("CredentialsSentBy", fields: [credentials_sent_by_id], references: [id])
+  credentials_sent_by    AdminUser? @relation("CredentialsSentBy", fields: [credentials_sent_by_id], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -85,10 +95,10 @@ model RegistrationRequest {
 // CLIENT PROFILE
 
 model Client {
-  id                      String  @id @default(uuid())
-  client_code             String? @unique // Immutable internal ID
-  phone_number            String @unique // Login ID
-  password                String  // PLAIN TEXT STORED AS REQUESTED
+  id           String  @id @default(uuid())
+  client_code  String? @unique // Immutable internal ID
+  phone_number String  @unique // Login ID
+  password     String // PLAIN TEXT STORED AS REQUESTED
 
   business_name String
   owner_name    String
@@ -97,8 +107,10 @@ model Client {
 
   status String @default("active") // active | inactive
 
-  orders Order[]
-  Design Design[]
+  orders            Order[]
+  designSubmissions DesignSubmission[]
+  approvedDesigns   ApprovedDesign[]
+  notifications     Notification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -124,38 +136,123 @@ model PrintingService {
 
 // TEMPLATE LIBRARY
 
+model TemplateCategory {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  templates Template[]
+
+  @@map("template_categories")
+}
+
 model Template {
-  id         String  @id @default(uuid())
-  name       String
-  category   String
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+
+  categoryId String
+  category   TemplateCategory @relation(fields: [categoryId], references: [id])
+
   fileUrl    String
   previewUrl String?
+  isActive   Boolean @default(true)
 
   createdAt DateTime @default(now())
+
+  submissions DesignSubmission[]
 
   @@map("templates")
 }
 
-// CUSTOM DESIGN APPROWAL
+// DESIGN SUBMISSION AND APPROVAL
 
-model Design {
+model DesignSubmission {
+  id       String @id @default(uuid())
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
+  templateId String?
+  template   Template? @relation(fields: [templateId], references: [id])
+
+  title String?
+  notes String?
+
+  fileUrl  String
+  fileType String
+  fileSize Int
+
+  status          DesignSubmissionStatus @default(PENDING_REVIEW)
+  feedbackMessage String?
+
+  approvedDesignId String? @unique
+
+  submittedAt DateTime @default(now())
+
+  reviewedBy_id String?
+  reviewedBy    AdminUser? @relation("ReviewedSubmissions", fields: [reviewedBy_id], references: [id])
+  reviewedAt    DateTime?
+
+  approvedDesign ApprovedDesign?
+
+  @@map("design_submissions")
+}
+
+model ApprovedDesign {
   id         String @id @default(uuid())
-  designCode String @unique
-  clientId   String
-  client     Client @relation(fields: [clientId], references: [id])
+  designCode String @unique // Public Design ID shown to client e.g., DSN-2026-000001
 
-  fileUrl    String
-  previewUrl String?
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
 
-  status DesignStatus @default(PENDING)
+  submissionId String           @unique
+  submission   DesignSubmission @relation(fields: [submissionId], references: [id])
 
+  previewUrl      String?
+  approvedFileUrl String
 
-  createdAt  DateTime  @default(now())
-  reviewedAt DateTime?
+  status ApprovedDesignStatus @default(ACTIVE)
+
+  approvedBy_id String?
+  approvedBy    AdminUser? @relation("ApprovedDesigns", fields: [approvedBy_id], references: [id])
+  approvedAt    DateTime   @default(now())
+
+  archivedBy_id String?
+  archivedBy    AdminUser? @relation("ArchivedDesigns", fields: [archivedBy_id], references: [id])
+  archivedAt    DateTime?
+  archiveReason String?
 
   orders Order[]
 
-  @@map("designs")
+  @@map("approved_designs")
+}
+
+// NOTIFICATIONS AND AUDIT LOGS
+
+model Notification {
+  id        String   @id @default(uuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id])
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String     @id @default(uuid())
+  action     String
+  entityId   String
+  entityType String
+  adminId    String?
+  admin      AdminUser? @relation(fields: [adminId], references: [id])
+  details    Json?
+  createdAt  DateTime   @default(now())
+
+  @@map("audit_logs")
 }
 
 // ORDER SYSTEM
@@ -174,7 +271,7 @@ model Order {
   specifications Json?
 
   designId String?
-  design   Design? @relation(fields: [designId], references: [id])
+  design   ApprovedDesign? @relation(fields: [designId], references: [id])
 
   status OrderStatus @default(ORDER_PLACED)
 
