@@ -1,12 +1,22 @@
 export interface User {
   id: string;
-  clientId: string;
+  userId: string;
+  clientId?: string;
+  role?: string;
   companyName: string;
-  contactPerson: string;
+  contactPerson?: string;
   phone: string;
   email: string;
   address: string;
+  createdAt?: string;
   printingRequirements?: string;
+  user?: user
+}
+
+export interface user {
+  clientId: string;
+  role: string;
+  createdAt?: string;
 }
 
 export type OrderStatus =

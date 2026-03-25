@@ -1,24 +1,65 @@
 "use client";
 
-import { useState } from "react";
-import { useAuthStore } from "@/store/authStore";
+import { useEffect, useState } from "react";
 import { notify } from "@/utils/notifications";
+import { useProfileStore } from "@/store/profileStore";
+import { address } from "motion/react-client";
 
 export default function ProfilePage() {
-    const { user } = useAuthStore();
+    const { fetchProfile, profile, editProfile } = useProfileStore();
+
     const [editing, setEditing] = useState(false);
-    const [form, setForm] = useState({
-        companyName: user?.companyName || "",
-        contactPerson: user?.contactPerson || "",
-        email: user?.email || "",
-        phone: "9800000000",
-        address: "Kathmandu, Nepal",
+
+    // Initial form state is derived from the actual profile; fallback if missing.
+    const getProfileFormData = () => ({
+        companyName: profile?.companyName || "",
+        contactPerson: profile?.contactPerson || "",
+        email: profile?.email || "",
+        phone: profile?.phone || "",
+        address: profile?.address || "",
     });
 
-    const handleSave = () => {
-        setEditing(false);
-        notify.success("Profile updated successfully!");
+    // Hold original so cancel can revert changes
+    const [originalForm, setOriginalForm] = useState(getProfileFormData());
+    const [form, setForm] = useState(getProfileFormData());
+
+    // When profile loads or updates, update both original and form states to reflect DB values
+    useEffect(() => {
+        const updated = getProfileFormData();
+        setOriginalForm(updated);
+        setForm(updated);
+    }, [
+        profile?.companyName, 
+        profile?.contactPerson, 
+        profile?.email, 
+        profile?.phone, 
+        profile?.address
+    ]);
+
+    const handleSave = async () => {
+        // Save to DB only the editable fields
+        const updates = {
+            phone: form.phone,
+            address: form.address
+        };
+        try {
+            await editProfile(updates);
+            setEditing(false);
+            notify.success("Profile updated successfully!");
+        } catch (error) {
+            notify.error("Failed to update profile.");
+        }
     };
+
+    const handleCancel = () => {
+        // Revert form values to the latest DB values (from profile)
+        setForm(originalForm);
+        setEditing(false);
+    };
+
+    useEffect(() => {
+        fetchProfile();
+    }, []);
 
     return (
         <div className="max-w-5xl mx-auto px-3 sm:px-6 py-8 sm:py-12">
@@ -34,16 +75,16 @@ export default function ProfilePage() {
                 <div className="bg-white rounded-2xl border border-[#e2e8f0] overflow-hidden mb-5 md:mb-0">
                     <div className="gradient-card p-8 sm:p-10 text-center">
                         <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl text-white font-extrabold border-[3px] border-white/40">
-                            {user?.contactPerson?.[0] || "C"}
+                            {(profile?.contactPerson && profile?.contactPerson[0]) || "C"}
                         </div>
-                        <h2 className="text-white font-extrabold text-base sm:text-lg tracking-wide">{user?.companyName}</h2>
-                        <p className="text-white/75 text-xs sm:text-sm mt-1">{user?.email}</p>
+                        <h2 className="text-white font-extrabold text-base sm:text-lg tracking-wide">{profile?.companyName}</h2>
+                        <p className="text-white/75 text-xs sm:text-sm mt-1">{profile?.email}</p>
                     </div>
                     <div className="p-5 sm:p-6">
                         <div className="flex flex-col gap-3">
                             <div className="p-3 bg-[#f0f4ff] rounded-[10px] border border-[#c7d9fd]">
                                 <div className="text-[0.65rem] font-bold text-[#4361ee] tracking-wider uppercase mb-1">Client ID</div>
-                                <div className="text-lg font-extrabold text-[#0f172a] tracking-wide">{user?.clientId}</div>
+                                <div className="text-lg font-extrabold text-[#0f172a] tracking-wide">{profile?.clientId}</div>
                             </div>
                             <div>
                                 <div className="text-xs text-[#94a3b8] mb-1">Account Status</div>
@@ -57,21 +98,45 @@ export default function ProfilePage() {
                 <div className="bg-white rounded-2xl border border-[#e2e8f0] p-5 sm:p-7 w-full">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
                         <h2 className="font-bold text-base sm:text-lg text-[#0f172a]">Company Details</h2>
-                        <button
-                            onClick={() => editing ? handleSave() : setEditing(true)}
-                            className={`
-                                ${editing ? "btn-primary" : "btn-outline-dark"}
-                                py-2 px-5 text-sm transition
-                            `}
-                        >
-                            {editing ? "💾 Save Changes" : "✏️ Edit"}
-                        </button>
+                        {!editing ? (
+                            <button
+                                onClick={() => setEditing(true)}
+                                className={`
+                                    btn-outline-dark
+                                    py-2 px-5 text-sm transition
+                                `}
+                            >
+                                ✏️ Edit
+                            </button>
+                        ) : (
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleSave}
+                                    className={`
+                                        btn-primary
+                                        py-2 px-5 text-sm transition
+                                    `}
+                                >
+                                    💾 Save Changes
+                                </button>
+                                <button
+                                    onClick={handleCancel}
+                                    className="
+                                        btn-outline-dark
+                                        py-2 px-5 text-sm transition
+                                    "
+                                    type="button"
+                                >
+                                    ❌ Cancel
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {/* Show DB (profile) values for readonly, form values for editing */}
                         {[
                             { label: "Company Name", name: "companyName" },
-                            { label: "Contact Person", name: "contactPerson" },
                             { label: "Email Address", name: "email" },
                             { label: "Phone Number", name: "phone" },
                         ].map(({ label, name }) => (
@@ -84,7 +149,10 @@ export default function ProfilePage() {
                                         ${editing ? "bg-[#f8fafc] cursor-text" : "bg-[#f1f5f9] cursor-not-allowed"}
                                         text-sm
                                     `}
-                                    value={form[name as keyof typeof form]}
+                                    value={editing
+                                        ? String(form[name as keyof typeof form] ?? "")
+                                        : String(profile?.[name as keyof typeof profile] ?? "")
+                                    }
                                     onChange={(e) => setForm((p) => ({ ...p, [name]: e.target.value }))}
                                     disabled={!editing}
                                 />
@@ -99,7 +167,9 @@ export default function ProfilePage() {
                                     ${editing ? "bg-[#f8fafc] cursor-text" : "bg-[#f1f5f9] cursor-not-allowed"}
                                     text-sm
                                 `}
-                                value={form.address}
+                                value={editing 
+                                    ? form.address 
+                                    : profile?.address || ""}
                                 onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
                                 disabled={!editing}
                             />
@@ -115,7 +185,7 @@ export default function ProfilePage() {
                         <button
                             onClick={() =>
                                 window.open(
-                                    `https://wa.me/97798XXXXXXXX?text=Hello%20Admin%2C%20I%20need%20help%20with%20my%20account%20%28Client%20ID%3A%20${user?.clientId}%29`,
+                                    `https://wa.me/97798XXXXXXXX?text=Hello%20Admin%2C%20I%20need%20help%20with%20my%20account%20%28Client%20ID%3A%20${profile?.clientId}%29`,
                                     "_blank"
                                 )
                             }

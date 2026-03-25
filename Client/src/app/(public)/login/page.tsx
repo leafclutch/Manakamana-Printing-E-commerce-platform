@@ -16,11 +16,13 @@ const features = [
 ];
 
 export default function LoginPage() {
+
+    const {login} = useAuthStore()
+
     const [clientId, setClientId] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { login } = useAuthStore();
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -29,15 +31,16 @@ export default function LoginPage() {
             notify.error("Please enter your Client ID and password");
             return;
         }
-        setLoading(true);
-        await new Promise((r) => setTimeout(r, 600));
-        const success = login(clientId, password);
-        setLoading(false);
-        if (success) {
+        try {
+            setLoading(true);
+            await login(clientId, password);
             notify.success("Welcome back! Redirecting to dashboard…");
             router.push('/')
-        } else {
-            notify.error("Invalid Client ID or password. Try CL102 / manakamana123");
+        } catch (error) {
+            notify.error("An unexpected error occurred. Please try again.");
+        }
+        finally{
+            setLoading(false)
         }
     };
 
@@ -108,9 +111,6 @@ export default function LoginPage() {
                                 {loading ? "SIGNING IN…" : "SIGN IN"}
                             </button>
                         </form>
-                        <p className="text-center mt-4 sm:mt-6 text-[0.78rem] text-[#64748b]">
-                            Demo: <strong className="text-[#0f172a]">CL102</strong> / <strong className="text-[#0f172a]">manakamana123</strong>
-                        </p>
                     </div>
                     {/* Right: Gradient Panel */}
                     <div className="gradient-card p-6 sm:p-10 flex flex-col justify-between relative overflow-hidden">

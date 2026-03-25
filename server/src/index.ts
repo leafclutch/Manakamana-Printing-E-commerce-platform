@@ -9,7 +9,10 @@ import { globalErrorHandler } from "./middleware/error.middleware";
 const app = express();
 const port = process.env.PORT || 8005;
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}));
 app.use(express.json());
 
 app.use("/api/v1/client", clientRoutes);

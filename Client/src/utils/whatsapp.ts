@@ -12,7 +12,7 @@ export const buildRegistrationMessage = (data: {
     phone: string;
     email: string;
     address: string;
-    printingNeeds: string;
+    message: string;
 }) => {
     return `Hello Manakamana Printing Press,
 
@@ -20,10 +20,10 @@ A new client registration request has been submitted.
 
 Company Name: ${data.companyName}
 Contact Person: ${data.contactPerson}
-Phone: ${data.phone}
+Phone: ${data.phone}    
 Email: ${data.email}
 Address: ${data.address}
-Printing Needs: ${data.printingNeeds}
+Printing Needs: ${data.message}
 
 Please review this request and provide Client ID and password.`;
 };

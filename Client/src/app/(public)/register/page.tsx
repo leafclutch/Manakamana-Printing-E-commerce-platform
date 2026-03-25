@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import { notify } from "@/utils/notifications";
 import { sendWhatsApp, buildRegistrationMessage } from "@/utils/whatsapp";
 import Image from "next/image";
+import { registerUser } from "@/api/auth";
 
 interface FormData {
     companyName: string;
@@ -53,22 +54,33 @@ export default function RegisterPage() {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validate()) return;
 
-        const message = buildRegistrationMessage({
+        const registrationData = {
             companyName: form.companyName,
             contactPerson: form.contactPerson,
             phone: form.phone,
             email: form.email,
             address: form.address,
-            printingNeeds: form.printingNeeds || "Not specified",
-        });
+            message: form.printingNeeds || "Not specified",
+        };
 
-        setSubmitted(true);
+        try {
+            // Attempt to register the user with the proper data structure
+            await registerUser(registrationData);
+            setSubmitted(true);
+            notify.success("Registration successful! We'll contact you soon.");
+        } catch (error: any) {
+            notify.error("Registration failed. Please try again later.");
+            return;
+        }
+
+        // Regardless, prepare a WhatsApp message for manual admin notification
+        const whatsapMessage = buildRegistrationMessage(registrationData);
         notify.whatsapp("Registration request prepared. Please send via WhatsApp.");
-        setTimeout(() => sendWhatsApp(message), 1000);
+        setTimeout(() => sendWhatsApp(whatsapMessage), 1000);
     };
 
     return (
@@ -97,9 +109,9 @@ export default function RegisterPage() {
                         <div>
                             <div className="mb-8">
                                 <div className="flex items-center gap-2.5 mb-6">
-                                <Image src={'/main-logo.png'} alt="this is logo" className="cursor-pointer" width={52} height={52}/>
+                                    <Image src={'/main-logo.png'} alt="this is logo" className="cursor-pointer" width={52} height={52} />
                                     <div>
-                                      <div className="text-white text-[0.9rem] font-extrabold tracking-[0.05em]">NEW MANAKAMANA</div>
+                                        <div className="text-white text-[0.9rem] font-extrabold tracking-[0.05em]">NEW MANAKAMANA</div>
                                         <div className="text-white/[0.65] text-[0.6rem] tracking-[0.15em]">PRINTERS</div>
                                     </div>
                                 </div>

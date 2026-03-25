@@ -3,22 +3,20 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { notify } from "@/utils/notifications";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-    const { isAuthenticated, isInitialized } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const router = useRouter();
 
     useEffect(() => {
-        if (isInitialized && !isAuthenticated) {
-            notify.lock();
+        if (!isAuthenticated) {
             router.replace("/login");
         }
-    }, [isAuthenticated, isInitialized, router]);
+    }, [isAuthenticated, router]);
 
-    if (!isInitialized || !isAuthenticated) return null;
+    if (!isAuthenticated) return null;
 
     return (
         <div className="min-h-screen bg-[#f8fafc] flex flex-col">

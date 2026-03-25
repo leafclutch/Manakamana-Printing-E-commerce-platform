@@ -1,71 +1,102 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import toast from "react-hot-toast";
+import type { User } from "../types";
+import { loginUser } from "@/api/auth";
 
 export interface AuthUser {
     clientId: string;
-    companyName: string;
-    contactPerson: string;
-    email: string;
+    role: string;
+    token: string;
 }
 
-interface AuthState {
+
+export interface AuthStoreState {
     user: AuthUser | null;
     isAuthenticated: boolean;
-    isInitialized: boolean;
-    login: (clientId: string, password: string) => boolean;
+    token: string | null;
+    loading: boolean;
+    login: (email: string, password: string) => Promise<void>;
     logout: () => void;
-    initialize: () => void;
+    checkAuth: () => boolean;
 }
 
-const MOCK_CREDENTIALS = {
-    clientId: "CL102",
-    password: "manakamana123",
-    user: {
-        clientId: "CL102",
-        companyName: "ABC Traders Pvt. Ltd.",
-        contactPerson: "Ram Sharma",
-        email: "abc@gmail.com",
-    },
-};
+export const useAuthStore = create<AuthStoreState>()(
+    persist(
+        (set) => ({
+            user: null,
+            isAuthenticated: false,
+            token: null,
+            loading: false,
 
-export const useAuthStore = create<AuthState>((set) => ({
-    user: null,
-    isAuthenticated: false,
-    isInitialized: false,
-
-    login: (clientId: string, password: string) => {
-        if (
-            clientId === MOCK_CREDENTIALS.clientId &&
-            password === MOCK_CREDENTIALS.password
-        ) {
-            set({ user: MOCK_CREDENTIALS.user, isAuthenticated: true });
-            if (typeof window !== "undefined") {
-                localStorage.setItem("mk_auth_user", JSON.stringify(MOCK_CREDENTIALS.user));
-            }
-            return true;
-        }
-        return false;
-    },
-
-    logout: () => {
-        set({ user: null, isAuthenticated: false });
-        if (typeof window !== "undefined") {
-            localStorage.removeItem("mk_auth_user");
-        }
-    },
-
-    initialize: () => {
-        if (typeof window !== "undefined") {
-            const stored = localStorage.getItem("mk_auth_user");
-            if (stored) {
+            login: async (email: string, password: string) => {
+                set({ loading: true });
                 try {
-                    const parsedUser = JSON.parse(stored);
-                    set({ user: parsedUser, isAuthenticated: true, isInitialized: true });
-                    return;
-                } catch {
-                    // ignore parse errors
+                    const data = await loginUser(email, password);
+                    const authUser = {
+                        ...data.user,
+                    };
+
+                    set({
+                        isAuthenticated: true,
+                        user: authUser,
+                        token: data.token,
+                    });
+
+                    localStorage.setItem("authUser", JSON.stringify({
+                        ...authUser,
+                        token: data.token,
+                    }));
+                    toast.success("Login successful!");
+                } catch (error) {
+                    toast.error("Invalid email or password");
+                    set({
+                        isAuthenticated: false,
+                        user: null,
+                        token: null,
+                    });
+                    throw new Error("Invalid credentials");
+                } finally {
+                    set({ loading: false });
                 }
-            }
+            },
+
+            logout: () => {
+                set({ isAuthenticated: false, user: null, token: null });
+                localStorage.removeItem("authUser");
+                toast.success("Logged out successfully!");
+            },
+
+            checkAuth: () => {
+                const stored = localStorage.getItem("authUser");
+                if (stored) {
+                    try {
+                        const userObj = JSON.parse(stored);
+                        set({
+                            user: userObj,
+                            isAuthenticated: true,
+                            token: userObj.token ?? null,
+                        });
+                        return true;
+                    } catch {
+                        set({
+                            user: null,
+                            isAuthenticated: false,
+                            token: null,
+                        });
+                        return false;
+                    }
+                }
+                set({
+                    user: null,
+                    isAuthenticated: false,
+                    token: null,
+                });
+                return false;
+            },
+        }),
+        {
+            name: "auth-storage",
         }
-        set({ isInitialized: true });
-    }
-}));
+    )
+);
