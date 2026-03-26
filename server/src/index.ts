@@ -9,11 +9,12 @@ import userRoutes from "./routes/user.routes";
 import templateRoutes from "./routes/template.routes";
 import designSubmissionRoutes from "./routes/design-submission.routes";
 import designRoutes from "./routes/design.routes";
-import orderRoutes from "./routes/order.routes";
 import productOrderRoutes from "./routes/product-order.routes";
 import clientWalletRoutes from "./routes/wallet/client-wallet.routes";
 import adminWalletRoutes from "./routes/wallet/admin-wallet.routes";
 import { globalErrorHandler } from "./middleware/error.middleware";
+import swaggerUi from "swagger-ui-express";
+const swaggerOutput = require("../swagger-output.json");
 
 const app = express();
 const port = process.env.PORT || 8005;
@@ -31,6 +32,9 @@ app.use("/api/v1", designRoutes);
 app.use("/api/v1/orders", productOrderRoutes);
 app.use("/api/v1/wallet", clientWalletRoutes);
 app.use("/api/v1/admin/wallet", adminWalletRoutes);
+
+// Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 
 //health check
 app.get("/",(req:Request,res:Response)=>{
