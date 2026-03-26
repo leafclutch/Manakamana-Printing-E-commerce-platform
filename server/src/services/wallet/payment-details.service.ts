@@ -6,7 +6,7 @@ export const createPaymentDetailsService = async (data: {
   accountName: string;
   accountNumber: string;
   branch?: string;
-  upiId?: string;
+  paymentId?: string;
   qrImageUrl?: string;
   note?: string;
   isActive?: boolean;
@@ -27,7 +27,7 @@ export const createPaymentDetailsService = async (data: {
       accountName: data.accountName,
       accountNumber: data.accountNumber,
       branch: data.branch,
-      upiId: data.upiId,
+      paymentId: data.paymentId,
       qrImageUrl: data.qrImageUrl,
       note: data.note,
       isActive: data.isActive !== false,

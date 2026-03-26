@@ -1,96 +1,110 @@
-# Full System Flow: Login to Order
+#  Full System Flow: Complete API Guide
 
-This guide details every technical step and API hit required for the Admin setup and Client ordering process.
+This document provides a technical walkthrough of every feature in the platform, from initial registration to final order fulfillment.
 
 ---
 
-## 🛠️ ADMIN FLOW: Catalog & Pricing Setup
+##  1. CLIENT ONBOARDING FLOW
 
-Admins must first define the products and the pricing combinations.
+Before a client can order, they must submit a registration request for admin approval.
 
-### 1. Initial Login
-*   **Action**: Admin logs into the dashboard.
-*   **API**: `POST /api/v1/admin/auth/login`
-*   **Payload**: `{ "email": "admin@example.com", "password": "..." }`
+### 1.1 Request Registration (Public)
+*   **Action**: Prospective client submits their business details.
+*   **API**: `POST /api/v1/register-request`
+*   **Payload**: ` { "business_name": "...", "owner_name": "...", "phone_number": "...", "email": "...", "address": "..." }`
 
-### 2. Create Core Product
-*   **Action**: Define the top-level product.
-*   **API**: `POST /api/v1/admin/products`
-*   **Payload**: `{ "product_code": "VC001", "name": "Visiting Card", "production_days": 3 }`
+### 1.2 Approve Client (Admin)
+*   **Action**: Admin reviews and approves the request to create a login.
+*   **API**: `POST /api/v1/admin/registration-requests/:requestId/approve`
 
-### 3. Create Product Variant
-*   **Action**: Add a specific variant (e.g., Slim, Premium).
-*   **API**: `POST /api/v1/admin/products/:productId/variants`
-*   **Payload**: `{ "variant_code": "VC_PREMIUM", "variant_name": "Premium Matte Texture", "min_quantity": 50 }`
+---
 
-### 4. Setup Options (Groups & Values)
-*   **Action**: Define what the client can choose.
+## 2. ADMIN SETUP: Catalog & Templates
+
+Admins must define how products are priced, how they accept payments, and what design templates are available.
+
+### 2.1 Setup Wallet Payment Details
+*   **Action**: Define bank accounts for clients to send money to.
+*   **API**: `POST /api/v1/admin/wallet/payment-details`
+*   **Payload**: `{ "companyName": "...", "bankName": "...", "accountNumber": "...", "paymentId": "mankamana@online" }`
+
+### 2.2 Template Management (Categories & Files)
+*   **Action**: Setup design categories (e.g., Visiting Cards, Banners) and upload sample templates.
+*   **API (Category)**: `POST /api/v1/admin/templates/categories` -> `{ "name": "Visiting Cards", "slug": "visiting-cards" }`
+*   **API (Template)**: `POST /api/v1/admin/templates` (Multipart/form-data: `{ "title": "Corporate Design", "categoryId": "...", "file": [TEMPLATE_FILE] }`)
+
+### 2.3 Define Universal Products
+*   **Action**: Create the parent Product and its Variants.
+*   **API (Product)**: `POST /api/v1/admin/products` -> Returns `productId`
+*   **API (Variant)**: `POST /api/v1/admin/products/:productId/variants` -> Returns `variantId`
+
+### 2.4 Setup Options & Pricing Matrix
+*   **Action**: Map attributes (Paper, Binding) and assign prices.
 *   **API (Group)**: `POST /api/v1/admin/variants/:variantId/option-groups`
-    *   `{ "name": "paper_quality", "label": "Paper Quality", "display_order": 1 }`
-*   **API (Values)**: `POST /api/v1/admin/groups/:groupId/option-values`
-    *   `{ "code": "250GSM", "label": "250 GSM Matte", "display_order": 1 }`
-
-### 5. Define Pricing Combinations
-*   **Action**: map combinations to a unit price.
-*   **API**: `POST /api/v1/admin/variants/:variantId/pricing`
-*   **Payload**: 
-    ```json
-    {
-      "paper_quality": "250GSM",
-      "holder_type": "standard",
-      "price": 15.50
-    }
-    ```
+*   **API (Value)**: `POST /api/v1/admin/groups/:groupId/option-values`
+*   **API (Pricing)**: `POST /api/v1/admin/variants/:variantId/pricing` -> `{ "paper_quality": "250GSM", "price": 25.50 }`
 
 ---
 
-## 🛒 CLIENT FLOW: Browsing & Ordering
+## 3. DESIGN FLOW (Submission & Approval)
 
-### 1. Initial Login
-*   **Action**: Client logs in.
-*   **API**: `POST /api/v1/auth/login`
-*   **Payload**: `{ "phone_number": "9800000000", "password": "..." }`
+Clients use templates or categories to submit their designs.
 
-### 2. Browse Product Config
-*   **Action**: Fetch full details of a variant including all options and existing pricing matrix.
-*   **API**: `GET /api/v1/admin/variants/:variantId/full-details`
-*   **Result**: Returns all groups, values, and valid pricing combinations.
+### 3.1 Browse Templates (Client)
+*   **Action**: Fetch existing categories and available templates to start designing.
+*   **API (Categories)**: `GET /api/v1/templates/categories`
+*   **API (Templates)**: `GET /api/v1/templates` (optional: `?categoryId=...`)
 
-### 3. Placing the Order
-*   **Action**: Client chooses options and quantity, and applies a discount.
+### 3.2 Submit Design (Client)
+*   **Action**: Upload a design file for a specific template.
+*   **API**: `POST /api/v1/design-submissions` (Multipart/form-data: `{ "templateId": "...", "title": "My Design", "file": [DESIGN_FILE] }`)
+
+### 3.3 Approve Design (Admin)
+*   **Action**: Admin verifies design and approves it.
+*   **API**: `POST /api/v1/admin/design-submissions/:submissionId/approve`
+*   **Result**: Generates an **Approved Design ID** (e.g., `DSN-2026-00001`).
+
+---
+
+##  4. WALLET FLOW (Funding)
+
+Clients must fund their wallet before payment.
+
+### 4.1 Submit Top-up Proof (Client)
+*   **Action**: Send money and upload proof.
+*   **API**: `POST /api/v1/wallet/topup-requests` (Multipart/form-data: `{ "amount": 5000, "paymentMethod": "ONLINE", "proofFile": [IMAGE] }`)
+
+### 4.2 Approve Top-up (Admin)
+*   **Action**: Admin verifies receipt and credits balance.
+*   **API**: `POST /api/v1/admin/wallet/topup-requests/:requestId/approve`
+
+---
+
+##  5. ORDERING FLOW (Universal Pricing)
+
+### 5.1 Create Order (Client)
+*   **Action**: Selects variant, options, and attaches an approved design.
 *   **API**: `POST /api/v1/orders`
 *   **Payload**:
     ```json
     {
       "variantId": "...",
-      "quantity": 100,
+      "quantity": 500,
+      "designId": "DSN-2026-00001",
       "options": {
         "paper_quality": "250GSM",
-        "holder_type": "standard",
         "configDetails": [
-          {
-            "groupName": "paper_quality",
-            "groupLabel": "Paper Quality",
-            "selectedCode": "250GSM",
-            "selectedLabel": "250 GSM Matte"
-          }
+           { "groupName": "paper_quality", "groupLabel": "Paper", "selectedCode": "250GSM", "selectedLabel": "250 GSM Matte" }
         ]
-      },
-      "discount": {
-        "type": "percentage",
-        "value": 10
-      },
-      "notes": "Urgent delivery"
+      }
     }
     ```
 
-### 4. Tracking Order
-*   **Action**: Client views their order history.
-*   **API**: `GET /api/v1/orders` (List) or `GET /api/v1/orders/:orderId` (Details)
+### 5.2 Pay via Wallet (Client)
+*   **Action**: Deduct funds and verify balance.
+*   **API**: `POST /api/v1/wallet/orders/:orderId/confirm-wallet-payment`
+*   **Result**: Status moves to `confirmed`.
 
----
-
-## ⚙️ Backend Logic Recap
-1.  **Resolution**: Searches `VariantPricing` table for the exact match of `holder_type`, `paper_quality`, etc.
-2.  **Pricing Snapshot**: Saves the resolved base price and the discount applied in the `pricing_snapshot` (JSONB) of the order.
-3.  **Audit**: Saves individual selections in `OrderConfiguration` to ensure the exact user choice is recorded.
+### 5.3 Order Fulfillment (Admin)
+*   **Action**: Admin manages production status.
+*   **API**: `PATCH /api/v1/admin/orders/:orderId/status` -> `{ "status": "COMPLETED" }`.

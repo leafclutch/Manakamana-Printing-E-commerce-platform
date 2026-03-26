@@ -3,7 +3,7 @@ import { z } from "zod";
 // -- Top-up request --
 export const submitTopupSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than 0"),
-  paymentMethod: z.enum(["UPI", "BANK_TRANSFER"]),
+  paymentMethod: z.enum(["ONLINE", "BANK_TRANSFER"]),
   transferReference: z.string().max(100).optional(),
   note: z.string().max(500).optional(),
 });
@@ -27,7 +27,7 @@ export const createPaymentDetailsSchema = z.object({
   accountName: z.string().min(1),
   accountNumber: z.string().min(1),
   branch: z.string().optional(),
-  upiId: z.string().optional(),
+  paymentId: z.string().optional(),
   qrImageUrl: z.string().optional(),
   note: z.string().max(500).optional(),
   isActive: z.boolean().optional().default(true),
@@ -53,7 +53,7 @@ export const topupQuerySchema = z.object({
 export const adminTopupQuerySchema = z.object({
   status: z.enum(["PENDING_REVIEW", "APPROVED", "REJECTED"]).optional(),
   clientId: z.string().optional(),
-  paymentMethod: z.enum(["UPI", "BANK_TRANSFER"]).optional(),
+  paymentMethod: z.enum(["ONLINE", "BANK_TRANSFER"]).optional(),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(20),
 });

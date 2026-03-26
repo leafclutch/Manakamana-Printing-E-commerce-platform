@@ -54,7 +54,7 @@ enum WalletTxnSource {
 }
 
 enum PaymentMethod {
-  UPI
+  ONLINE
   BANK_TRANSFER
 }
 
@@ -428,7 +428,7 @@ model CompanyPaymentDetail {
   accountName   String
   accountNumber String
   branch        String?
-  upiId         String?
+  paymentId     String?
   qrImageUrl    String?
   note          String?
   isActive      Boolean @default(true)

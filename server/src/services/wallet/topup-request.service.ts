@@ -6,7 +6,7 @@ import { getOrCreateWalletService } from "./wallet-account.service";
 export const submitTopupService = async (data: {
   clientId: string;
   submittedAmount: number;
-  paymentMethod: "UPI" | "BANK_TRANSFER";
+  paymentMethod: "ONLINE" | "BANK_TRANSFER";
   transferReference?: string;
   note?: string;
   proofFilePath: string;

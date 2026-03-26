@@ -17,7 +17,7 @@ export const getPaymentDetails = async (req: Request, res: Response) => {
         accountName: details.accountName,
         accountNumber: details.accountNumber,
         branch: details.branch,
-        upiId: details.upiId,
+        paymentId: details.paymentId,
         qrImageUrl: details.qrImageUrl,
         note: details.note,
       },
