@@ -1,7 +1,7 @@
 import prisma from "../../connect";
 import { getOrCreateWalletService } from "./wallet-account.service";
 
-// ── CLIENT: Get wallet transactions ──
+// getClientTransactionsService: Paginated retrieval of the authenticated client's financial transaction history
 export const getClientTransactionsService = async (params: {
   clientId: string;
   type?: string;
@@ -45,7 +45,7 @@ export const getClientTransactionsService = async (params: {
   };
 };
 
-// ── ADMIN: Get all transactions ──
+// getAdminTransactionsService: Comprehensive paginated audit trail of all transactions across the entire system
 export const getAdminTransactionsService = async (params: {
   clientId?: string;
   type?: string;
@@ -101,7 +101,7 @@ export const getAdminTransactionsService = async (params: {
   };
 };
 
-// ── Deduct wallet for order (ATOMIC) ──
+// deductForOrderService: High-integrity atomic transaction for deducting wallet funds to pay for an order
 export const deductForOrderService = async (orderId: string, clientId: string) => {
   return prisma.$transaction(async (tx) => {
     // 1. Fetch order
@@ -111,9 +111,7 @@ export const deductForOrderService = async (orderId: string, clientId: string) =
     });
     if (!order) throw new Error("Order not found");
     if (order.user_id !== clientId) throw new Error("Order does not belong to you");
-    // Note: status is used for overall order status, we'll check if it's already 'paid' or 'confirmed' if we had a payment status
-    // For now, if walletTransactionId is set, it's paid.
-    if (order.walletTransactionId) throw new Error("Order already paid");
+    if (order.payment_status === "PAID" || order.walletTransactionId) throw new Error("Order already paid");
     
     const orderAmount = Number(order.final_amount);
 
@@ -157,8 +155,7 @@ export const deductForOrderService = async (orderId: string, clientId: string) =
       where: { id: orderId },
       data: {
         walletTransactionId: txn.id,
-        // We could also update status to 'ORDER_PLACED' or similar if it was 'pending'
-        status: "ORDER_PLACED" 
+        payment_status: "PAID",
       },
     });
 
@@ -178,6 +175,7 @@ export const deductForOrderService = async (orderId: string, clientId: string) =
     return {
       orderId,
       walletTransactionId: txn.id,
+      paymentStatus: "PAID",
       deductedAmount: orderAmount,
       newWalletBalance: newBalance,
     };
