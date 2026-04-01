@@ -10,6 +10,7 @@ export interface User {
   address: string;
   createdAt?: string;
   notes?: string;
+  wallet_balance?: number;
   user?: user
 }
 
@@ -18,6 +19,8 @@ export interface user {
   role: string;
   createdAt?: string;
 }
+
+
 
 export type OrderStatus =
   | "ORDER_PLACED"
@@ -43,9 +46,10 @@ export interface Order {
 export interface Service {
   id: string;
   name: string;
-  minimumQuantity: number;
-  imageUrl?: string;
-  image?: string;
+  description?: string;
+  basePrice?: number;
+  isActive?: boolean;
+  createdAt?: string;
 }
 
 export interface Template {

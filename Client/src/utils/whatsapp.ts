@@ -70,6 +70,7 @@ Please review this template for printing approval.`;
 export const buildCustomDesignMessage = (data: {
     clientId: string;
     designType: string;
+    designTitle?:string;
     fileName?: string;
 }) => {
     return `Hello Admin,

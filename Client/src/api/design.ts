@@ -1,10 +1,12 @@
 import api from "./axios";
 
 // Submit a design
-export const submitDesignApi = async (fileUrl:string): Promise<any> => {
+export const submitDesignApi = async (formData:FormData): Promise<any> => {
     try {
         // If designData is FormData, do not set Content-Type (browser will handle multipart)
-        const response = await api.post('/v1/client/designs/submit', {fileUrl});
+        const response = await api.post('/v1/design-submissions', formData, {headers: {
+            "Content-Type": "multipart/form-data",
+        },});
         console.log(response.data.data);
         return response.data.data;
     } catch (error) {

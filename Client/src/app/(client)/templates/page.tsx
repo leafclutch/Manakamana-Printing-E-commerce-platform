@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/constants";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { notify } from "@/utils/notifications";
 import { sendWhatsApp, buildCustomDesignMessage } from "@/utils/whatsapp";
@@ -9,6 +8,7 @@ import { SERVICES } from "@/constants";
 import { FiUploadCloud, FiGrid, FiEdit3, FiChevronRight } from "react-icons/fi";
 import Image from "next/image";
 import { useDesignStore } from "@/store/designStore";
+import { useTemplateStore } from "@/store/useTemplateStore";
 
 const categoryIcons: Record<string, string> = {
     "Visiting Cards": "🪪",
@@ -18,9 +18,10 @@ const categoryIcons: Record<string, string> = {
     "Garment Tags": "🏷️",
 };
 
+
 const getCategoryTheme = (category: string) => {
     switch (category) {
-        case "Visiting Cards": return "bg-[#fde8e8]";
+        case "Card Holders": return "bg-[#fde8e8]";
         case "Letterheads": return "bg-[#e8f0fe]";
         case "Envelopes": return "bg-[#fef3e8]";
         case "ID Cards": return "bg-[#e8fdf0]";
@@ -28,21 +29,23 @@ const getCategoryTheme = (category: string) => {
         default: return "bg-[#f1f5f9]";
     }
 };
-
 type Tab = "free" | "custom";
 
 export default function TemplatesPage() {
-    const { submitDesign } = useDesignStore()
+    const { getCategories, getAllTemplates, templates, category } = useTemplateStore()
+    const { submitDesign } = useDesignStore();
     const { user } = useAuthStore();
     const [activeTab, setActiveTab] = useState<Tab>("free");
     const [activeCategory, setActiveCategory] = useState("All");
+    const [templateId, setTemplateId] = useState('')
     const [customDesignType, setCustomDesignType] = useState("");
+    const [customDesignTitle, setCustomDesignTitle] = useState(""); // NEW STATE for design title
     const [customDesignFile, setCustomDesignFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
 
-    const categories = ["All", ...TEMPLATE_CATEGORIES];
-    const filtered = activeCategory === "All" ? TEMPLATES : TEMPLATES.filter((t) => t.category === activeCategory);
+    const categories = ["All", ...category];
+    const filtered = activeCategory === "All" ? templates : templates.filter((t) => t.category?.name === activeCategory);
 
     const handleDownload = (imageSrc: string, name: string) => {
         const link = document.createElement("a");
@@ -53,6 +56,12 @@ export default function TemplatesPage() {
         document.body.removeChild(link);
         notify.success(`"${name}" download started!`);
     };
+
+    useEffect(() => {
+      getCategories()
+      getAllTemplates()
+    }, [])
+    
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
@@ -76,6 +85,10 @@ export default function TemplatesPage() {
             notify.error("Please select a design type first.");
             return;
         }
+        if (!customDesignTitle) {
+            notify.error("Please enter your design title.");
+            return;
+        }
         if (!customDesignFile) {
             notify.error("Please attach your design image file.");
             return;
@@ -85,16 +98,32 @@ export default function TemplatesPage() {
 
         // Try to copy image to clipboard so user can paste in WhatsApp
         try {
-            if (!previewUrl) {
-                throw new Error("Preview URL is not available");
+            console.log(customDesignFile)
+            const formData = new FormData();
+            formData.append("file", customDesignFile);
+            formData.append("templateId", templateId);
+            formData.append("title", customDesignTitle);
+
+            // Send the FormData to the submitDesign function
+            await submitDesign(formData);
+
+            // Clear/reset form data after successful submit
+            setCustomDesignFile(null);
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+            setCustomDesignTitle("");
+            setCustomDesignType("");
+            
+            if (navigator.clipboard && window.ClipboardItem) {
+                const arrayBuffer = await customDesignFile.arrayBuffer();
+                const clipboardItem = new window.ClipboardItem({
+                    [customDesignFile.type]: new Blob([arrayBuffer], { type: customDesignFile.type }),
+                });
+                await navigator.clipboard.write([clipboardItem]);
+                notify.success("✅ Image copied to clipboard! Paste it (Ctrl+V) in the WhatsApp chat.");
+            } else {
+                throw new Error("Clipboard API not available");
             }
-            await submitDesign(previewUrl);
-            const arrayBuffer = await customDesignFile.arrayBuffer();
-            const clipboardItem = new ClipboardItem({
-                [customDesignFile.type]: new Blob([arrayBuffer], { type: customDesignFile.type }),
-            });
-            await navigator.clipboard.write([clipboardItem]);
-            notify.success("✅ Image copied to clipboard! Paste it (Ctrl+V) in the WhatsApp chat.");
         } catch (err) {
             // Clipboard API may be blocked — fall back to instructions
             notify.whatsapp("WhatsApp will open now. Please manually attach your design image in the chat.");
@@ -103,6 +132,7 @@ export default function TemplatesPage() {
         const message = buildCustomDesignMessage({
             clientId: user?.clientId || "N/A",
             designType: customDesignType,
+            designTitle: customDesignTitle,
             fileName: customDesignFile.name,
         });
 
@@ -210,18 +240,18 @@ export default function TemplatesPage() {
 
                             {/* Category Filter */}
                             <div className="flex gap-2 flex-wrap mb-6">
-                                {categories.map((cat) => {
-                                    const isActive = activeCategory === cat;
+                                {categories.map((cat, idx) => {
+                                    const isActive = activeCategory === cat.name;
                                     return (
                                         <button
-                                            key={cat}
-                                            onClick={() => setActiveCategory(cat)}
+                                            key={idx}
+                                            onClick={() => setActiveCategory(typeof cat === "object" && "name" in cat ? String(cat.name) : String(cat))}
                                             className={`px-3 py-1 md:px-[1.125rem] md:py-[0.4rem] rounded-[50px] font-semibold text-[0.78rem] cursor-pointer transition-all duration-200 border-[1.5px] ${isActive
                                                 ? "border-transparent bg-gradient-to-r from-[#1a56db] to-[#2563eb] text-white"
                                                 : "border-[#e2e8f0] bg-white text-[#475569] hover:bg-gray-50"
                                                 }`}
                                         >
-                                            {cat}
+                                            {typeof cat === "object" && "name" in cat ? cat.name : String(cat)}
                                         </button>
                                     );
                                 })}
@@ -232,8 +262,8 @@ export default function TemplatesPage() {
                                 {filtered.map((template) => (
                                     <div key={template.id} className="card overflow-hidden">
                                         <div className={`h-[110px] sm:h-[130px] ${getCategoryTheme(template.category)} flex flex-col items-center justify-center gap-2 relative overflow-hidden cursor-pointer`}>
-                                            {template.image ? (
-                                                <Image src={template.image} alt={template.name} fill className="object-cover" />
+                                            {template?.fileUrl ? (
+                                                <Image src={template?.fileUrl} alt={template.title} fill className="object-cover" />
                                             ) : (
                                                 <>
                                                     <span className="text-[2rem] sm:text-[2.2rem]">{categoryIcons[template.category] || "📄"}</span>
@@ -304,16 +334,35 @@ export default function TemplatesPage() {
                             <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm p-5 sm:p-7">
 
                                 {/* Design Type */}
-                                <div className="form-group mb-5">
+                                <div className="form-group mb-4">
                                     <label className="form-label">Design Type <span className="text-red-500">*</span></label>
                                     <select
                                         value={customDesignType}
-                                        onChange={(e) => setCustomDesignType(e.target.value)}
+                                        onChange={(e) => {setCustomDesignType(e.target.value);
+                                        const selectedTemplate = templates.find(cat => cat.title === e.target.value);
+                                        if (selectedTemplate) {
+                                            setTemplateId(selectedTemplate.id)
+                                        }
+                                        }}
                                         className="form-input appearance-none"
                                     >
                                         <option value="">Select design type…</option>
-                                        {SERVICES.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+                                        {templates.map((s) => <option key={s.id} value={s.title}>{s.title}</option>)}
                                     </select>
+                                </div>
+
+                                {/* Design Title */}
+                                <div className="form-group mb-5">
+                                    <label className="form-label">
+                                        Design Title <span className="text-[#64748b]">(optional, but helps admin)</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={customDesignTitle}
+                                        onChange={(e) => setCustomDesignTitle(e.target.value)}
+                                        className="form-input"
+                                        placeholder="Enter a title for your design (e.g. My Business Card V2)"
+                                    />
                                 </div>
 
                                 {/* File Upload */}

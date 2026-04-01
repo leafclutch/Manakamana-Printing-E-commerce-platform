@@ -22,7 +22,7 @@ export interface DesignStoreState {
     loading: boolean;
     error: string | null;
     fetchAllDesigns: () => Promise<void>;
-    submitDesign: (fileUrl: string) => Promise<void>
+    submitDesign: (formData: FormData) => Promise<void>
     fetchApprovedDesigns: (id:string) => Promise<void>;
     verifyDesign: (designCode: string) => Promise<Design | undefined>;
     clearDesigns: () => void;
@@ -47,10 +47,10 @@ export const useDesignStore = create<DesignStoreState>()(
                 }
             },
 
-            submitDesign: async (fileUrl: string) => {
+            submitDesign: async (formData:FormData) => {
                 set({ loading: true, error: null });
                 try {
-                    const designSubmitted = await submitDesignApi(fileUrl)
+                    const designSubmitted = await submitDesignApi(formData)
                     set((state) => ({
                         designs: [...state.designs, designSubmitted],
                         error: null
