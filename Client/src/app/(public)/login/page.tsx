@@ -7,6 +7,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuthStore } from "@/store/authStore";
 import { notify } from "@/utils/notifications";
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 const features = [
     { icon: "🏷️", title: "Wholesale Rates", desc: "Get the best prices in the industry directly from the source." },
@@ -98,7 +99,7 @@ export default function LoginPage() {
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-[#94a3b8] text-base"
                                     >
-                                        {showPassword ? "🙈" : "👁️"}
+                                        {showPassword ? <IoMdEyeOff /> : <IoMdEye />}
                                     </button>
                                 </div>
                             </div>

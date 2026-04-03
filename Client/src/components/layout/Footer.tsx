@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { BsInstagram } from "react-icons/bs";
-import { FaFacebookF } from "react-icons/fa";
+import { FaFacebookF, FaPhoneAlt } from "react-icons/fa";
+import { FaLocationDot } from "react-icons/fa6";
+import { IoIosMail } from "react-icons/io";
 import { IoLogoTiktok } from "react-icons/io5";
 
 const socialLinks = [
@@ -68,11 +70,11 @@ export default function Footer() {
                     <p className="footer-heading">Our Location</p>
                     <div className="flex flex-col gap-3">
                         <div className="flex gap-2.5 items-start">
-                            <span className="text-[color:var(--primary)] mt-[0.1rem]">📍</span>
+                            <span className="text-[color:var(--primary)] mt-[0.1rem]"><FaLocationDot /></span>
                             <span className="text-[0.8rem] leading-[1.6]">Head Office<br />Butwal-6, Traffic Chowk, (Jagriti Path)</span>
                         </div>
                         <div className="flex gap-2.5 items-start">
-                            <span className="text-[color:var(--primary)] mt-[0.1rem]">📞</span>
+                            <span className="text-[color:var(--primary)] mt-[0.1rem]"><FaPhoneAlt /></span>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[0.8rem]">
                                     <span className="font-semibold">+977 9804458995</span> <span className="text-slate-400">(Office)</span>
@@ -86,7 +88,7 @@ export default function Footer() {
                             </div>
                         </div>
                         <div className="flex gap-2.5 items-center">
-                            <span className="text-[color:var(--primary)]">✉️</span>
+                            <span className="text-[color:var(--primary)]"><IoIosMail /></span>
                             <span className="text-[0.8rem]">nmpress2082@gmail.com</span>
                         </div>
                     </div>

@@ -9,14 +9,15 @@ import { verifyDesign } from "@/api/design";
 import { useDesignStore } from "@/store/designStore";
 import { useIDCardStore } from "@/store/useIDCardStore";
 import { useWalletStore } from "@/store/useWalletStore";
+import toast from "react-hot-toast";
 
 // ── Mock Data ──────────────────────────────────────────────────────────────
 // const ID_CARD_VARIANTS = [...];
 
 export default function CreateIdCardOrder() {
     const { fetchAllDesigns } = useDesignStore();
-    const { fetchProducts, products, createOrder} = useIDCardStore()
-    const { wallet, fetchWallet } = useWalletStore();
+    const { fetchProducts, products, createOrder } = useIDCardStore()
+    const { wallet, fetchWallet, confirmWalletPayment } = useWalletStore();
 
     // ── State ──────────────────────────────────────────────────────────────────
     const [orderName, setOrderName] = useState("");
@@ -104,13 +105,25 @@ export default function CreateIdCardOrder() {
 
         if (!orderName.trim()) {
             setErrors(p => ({ ...p, orderName: "Order name is required" }));
+            toast.error("Order name is required")
             return;
         }
         if (!selectedVariantId) {
             setErrors(p => ({ ...p, selectedVariantId: "Please select a product" }));
+            toast.error("Please select a product")
             return;
         }
-        // Optionally add validation for strap color/text if required
+        // Validation for strap color/text if required
+        if (!strapColor.trim()) {
+            setErrors(p => ({ ...p, strapColor: "Strap color is required" }));
+            toast.error("Strap color is required");
+            return;
+        }
+        if (!strapText.trim()) {
+            setErrors(p => ({ ...p, strapText: "Strap text is required" }));
+            toast.error("Strap text is required");
+            return;
+        }
 
         // const message = buildOrderMessage({
         //     clientId: user?.clientId || "N/A",
@@ -132,9 +145,14 @@ export default function CreateIdCardOrder() {
             notes: orderName, // or use another field if orderName is not appropriate for notes
         };
         try {
-            await createOrder(orderPayload);
+            const order = await createOrder(orderPayload);
+            if (!order?.id) {
+                notify.error("Order created but missing order ID. Please contact support.");
+                return;
+            }
+            await confirmWalletPayment(order.id)
             setSubmitted(true);
-            notify.whatsapp("Order placed! Admin will confirm via WhatsApp.");
+            notify.whatsapp("Order placed! Admin will confirm via Dashboard.");
             // setTimeout(() => sendWhatsApp(message), 800);
         } catch (error) {
             notify.error("Failed to place order. Please try again.");

@@ -107,7 +107,7 @@ export default function OrdersPage() {
                                 <th className="p-4 font-bold">Order Name</th>
                                 <th className="p-4 font-bold">Service</th>
                                 <th className="p-4 font-bold">Quantity</th>
-                                {/* <th className="p-4 font-bold">Paper / Finish</th> */}
+                                <th className="p-4 font-bold">Price</th>
                                 <th className="p-4 font-bold">Status</th>
                                 <th className="p-4 font-bold">Date</th>
                             </tr>
@@ -135,10 +135,13 @@ export default function OrdersPage() {
                                         <td className="p-4 text-[#475569]">
                                             {order.pricing_snapshot?.quantity?.toLocaleString() || ""}
                                         </td>
-                                        {/* <td className="p-4">
-                                            <div className="text-[0.78rem] text-[#0f172a]">{getPaperType(order)}</div>
-                                            <div className="text-[0.68rem] text-[#94a3b8]">{getFinishingOption(order)}</div>
-                                        </td> */}
+                                        <td className="p-4">
+                                            <div className="text-md font-semibold text-[#0f172a]">
+                                                {order.final_amount
+                                                    ? `Rs. ${order.final_amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                    : "---"}
+                                            </div>
+                                        </td>
                                         <td className="p-4">
                                             <span className={`badge ${getStatusColor(order.status as OrderStatus)}`}>
                                                 {getStatusLabel(order.status as OrderStatus)}

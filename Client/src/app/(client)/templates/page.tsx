@@ -129,17 +129,17 @@ export default function TemplatesPage() {
             notify.whatsapp("WhatsApp will open now. Please manually attach your design image in the chat.");
         }
 
-        const message = buildCustomDesignMessage({
-            clientId: user?.clientId || "N/A",
-            designType: customDesignType,
-            designTitle: customDesignTitle,
-            fileName: customDesignFile.name,
-        });
+        // const message = buildCustomDesignMessage({
+        //     clientId: user?.clientId || "N/A",
+        //     designType: customDesignType,
+        //     designTitle: customDesignTitle,
+        //     fileName: customDesignFile.name,
+        // });
 
-        setTimeout(() => {
-            sendWhatsApp(message);
-            setIsSending(false);
-        }, 900);
+        // setTimeout(() => {
+        //     sendWhatsApp(message);
+        //     setIsSending(false);
+        // }, 900);
     };
 
     const sidebarItems: { id: Tab; label: string; icon: React.ReactNode; description: string }[] = [
@@ -428,7 +428,7 @@ export default function TemplatesPage() {
                                         disabled={isSending}
                                         className="btn-primary flex-1 py-3 px-6 text-[0.88rem] font-bold disabled:opacity-60 disabled:cursor-not-allowed"
                                     >
-                                        {isSending ? "⏳ Opening WhatsApp…" : "💬 Send Design via WhatsApp"}
+                                        {isSending ? "⏳ Submitting Design…" : "Submit Custom Design"}
                                     </button>
                                     <button
                                         onClick={() => setActiveTab("free")}

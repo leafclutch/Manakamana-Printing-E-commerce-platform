@@ -8,12 +8,14 @@ import { notify } from "@/utils/notifications";
 import { AnimatePresence, easeInOut, motion } from 'motion/react'
 import Image from "next/image";
 import { useProfileStore } from "@/store/profileStore";
-import { FaWallet } from "react-icons/fa";
+import { FaWallet, FaBell } from "react-icons/fa";
 import { useWalletStore } from "@/store/useWalletStore";
+import { useNotificationStore } from "@/store/notificationStore";
 
 export default function Navbar() {
     const { fetchWallet, wallet } = useWalletStore()
     const { profile } = useProfileStore()
+    const { unreadCount } = useNotificationStore()
     const { isAuthenticated, logout } = useAuthStore();
     const pathname = usePathname();
     const router = useRouter();
@@ -85,6 +87,18 @@ export default function Navbar() {
                 <div className="flex items-center gap-3">
                     {isAuthenticated ? (
                         <div className="flex gap-2 items-center">
+{/* 
+                            <Link 
+                                href="/notifications"
+                                className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors group h-10 w-10 flex items-center justify-center border border-gray-200"
+                            >
+                                <FaBell className="text-xl group-hover:text-amber-500 transition-colors" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black w-4 h-4 flex items-center justify-center rounded-full border-2 border-white animate-bounce-slow">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
+                            </Link> */}
 
                             <div 
                                 onClick={() => { setIsWalletOpen(!isWalletOpen); setIsProfileOpen(false); }}

@@ -7,6 +7,7 @@ import {
     IDCardPriceResponse,
     CreateIDCardOrderRequest,
     CreateIDCardOrderResponse,
+    CreateIDCardOrderResponseData,
     IDCardOrder,
     fetchAllOrders, // <-- Optionally import an order type if you have one (update as per your API)
 } from "@/api/id";
@@ -35,7 +36,7 @@ interface IDCardState {
         quantity: number
     ) => Promise<void>;
 
-    createOrder: (orderData: CreateIDCardOrderRequest) => Promise<void>;
+    createOrder: (orderData: CreateIDCardOrderRequest) => Promise<CreateIDCardOrderResponseData>;
 }
 
 export const useIDCardStore = create<IDCardState>()(
@@ -88,19 +89,22 @@ export const useIDCardStore = create<IDCardState>()(
                     });
                 }
             },
-            createOrder: async (orderData: CreateIDCardOrderRequest) => {
+            createOrder: async (orderData: CreateIDCardOrderRequest): Promise<CreateIDCardOrderResponseData> => {
                 set({ loading: true, error: null, orderResponse: null });
                 try {
                     const response = await createIDCardOrder(orderData);
                     set({ orderResponse: response, loading: false });
-                    toast.success("Order Placed Successfully!")
+                    toast.success("Order Placed Successfully!");
+                    console.log("response::, ", response)
+                    return response;
                 } catch (err: any) {
-                    toast.error("Failed to create ID Card order")
+                    toast.error("Failed to create ID Card order");
                     set({
                         error: err.message || "Failed to create ID Card order",
                         loading: false,
                         orderResponse: null,
                     });
+                    throw err;
                 }
             },
             // Add fetchMyOrders implementation

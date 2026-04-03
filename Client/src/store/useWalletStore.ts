@@ -3,7 +3,7 @@ import {
   fetchWalletApi,
   submitWalletTopupApi,
   fetchPaymentDetailsApi,
-  fetchWalletTransactionsApi,
+  confirmWalletPaymentApi, // Add the import for confirm wallet payment
 } from "@/api/wallet";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -59,10 +59,12 @@ export interface WalletStoreState {
   paymentDetails: PaymentDetails | null;
 
   fetchWallet: () => Promise<void>;
-  fetchWalletTransactions: () => Promise<void>;
+//   fetchWalletTransactions: () => Promise<void>;
   fetchTopupRequests: () => Promise<void>;
   fetchPaymentDetails: () => Promise<void>;
   submitTopup: (formData: FormData) => Promise<void>;
+  // Add the confirm method
+  confirmWalletPayment: (orderId: string) => Promise<void>;
   clearWallet: () => void;
 }
 
@@ -88,17 +90,17 @@ export const useWalletStore = create<WalletStoreState>()(
         }
       },
 
-      fetchWalletTransactions: async () => {
-        set({ loading: true, error: null });
-        try {
-          const txs = await fetchWalletTransactionsApi();
-          set({ transactions: Array.isArray(txs) ? txs : [], error: null });
-        } catch (error: any) {
-          set({ error: error?.message || "Failed to fetch transactions" });
-        } finally {
-          set({ loading: false });
-        }
-      },
+    //   fetchWalletTransactions: async () => {
+    //     set({ loading: true, error: null });
+    //     try {
+    //       const txs = await fetchWalletTransactionsApi();
+    //       set({ transactions: Array.isArray(txs) ? txs : [], error: null });
+    //     } catch (error: any) {
+    //       set({ error: error?.message || "Failed to fetch transactions" });
+    //     } finally {
+    //       set({ loading: false });
+    //     }
+    //   },
 
       fetchTopupRequests: async () => {
         set({ loading: true, error: null });
@@ -137,6 +139,24 @@ export const useWalletStore = create<WalletStoreState>()(
           await get().fetchWallet();
         } catch (error: any) {
           set({ error: error?.message || "Failed to submit top-up request" });
+          throw error;
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      // Add confirmWalletPayment method
+      confirmWalletPayment: async (orderId: string) => {
+        set({ loading: true, error: null });
+        try {
+          const result = await confirmWalletPaymentApi(orderId);
+          // Optionally update the wallet in store to match the new balance after confirmation
+          await get().fetchWallet();
+          // Optionally update transactions (comment out if not needed)
+          await get().fetchWalletTransactions();
+         
+        } catch (error: any) {
+          set({ error: error?.message || "Failed to confirm wallet payment" });
           throw error;
         } finally {
           set({ loading: false });

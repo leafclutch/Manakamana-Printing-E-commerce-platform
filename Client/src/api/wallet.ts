@@ -12,14 +12,14 @@ export const fetchWalletApi = async () => {
 };
 
 // Fetch wallet transactions
-export const fetchWalletTransactionsApi = async () => {
-    try {
-        const response = await api.get('/v1/client/wallet/transactions');
-        return response.data.data.items;
-    } catch (error) {
-        throw error;
-    }
-};
+// export const fetchWalletTransactionsApi = async () => {
+//     try {
+//         const response = await api.get('/v1/client/wallet/transactions');
+//         return response.data.data.items;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
 
 // Fetch all top-up requests
 export const fetchTopupRequestsApi = async () => {
@@ -55,6 +55,20 @@ export const fetchPaymentDetailsApi = async () => {
     try {
         const response = await api.get('/v1/wallet/payment-details');
         // console.log(response.data.data)
+        return response.data.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Confirm wallet payment (top-up) API
+export const confirmWalletPaymentApi = async (orderId: string) => {
+    try {
+        const response = await api.post(
+            `/v1/orders/${orderId}/confirm-wallet-payment`,
+            { useWallet: true }
+        );
+        console.log(response.data.data)
         return response.data.data;
     } catch (error) {
         throw error;

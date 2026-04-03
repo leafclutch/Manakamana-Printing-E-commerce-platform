@@ -17,7 +17,7 @@ export const submitDesignApi = async (formData:FormData): Promise<any> => {
 // Fetch all submitted design by ID
 export const getAllDesign = async () => {
     try {
-        const response = await api.get(`/v1/client/designs/my-submissions`);
+        const response = await api.get(`/v1/design-submissions/my`);
         console.log(response.data);
         // return response.data;
     } catch (error) {

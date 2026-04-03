@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuthStore } from "@/store/authStore";
+import Image from "next/image";
+import { useProfileStore } from "@/store/profileStore";
+import { useWalletStore } from "@/store/useWalletStore";
 
 const heroSlides = [
   {
@@ -68,6 +71,8 @@ export default function HomePage() {
 
   //zustand store
   const {isAuthenticated} = useAuthStore()
+  const { fetchProfile, profile} = useProfileStore()
+  const { fetchWallet, wallet } = useWalletStore()
 
   const router = useRouter();
   const [activeSlide, setActiveSlide] = useState(0);
@@ -79,6 +84,14 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    fetchProfile();
+  }, [profile]);
+
+  useEffect(() => {
+    fetchWallet();
+  }, [wallet]);
+  
   return (
     <>
       <Navbar />
@@ -161,14 +174,22 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="max-w-full sm:max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
+          <div className="max-w-full sm:max-w-[1200px] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6 justify-items-center">
             {/* Printing Services */}
             <div
-              className="card overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+              className="card w-full shadow-xl max-w-[520px] overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
               onClick={() => router.push('/services')}
             >
-              <div className="h-[110px] sm:h-[160px] md:h-[180px] bg-gradient-to-br from-[#ffecd2] to-[#fcb69f] flex items-center justify-center text-[2.2rem] sm:text-[3.2rem] md:text-[4rem]">
-                🖨️
+              <div className="relative h-[110px] sm:h-[160px] md:h-[180px] w-full bg-gradient-to-br from-[#ffecd2] to-[#fcb69f] overflow-hidden">
+                <Image
+                  src="/images/printing-services/printing-services-logo.webp"
+                  alt="Printing Services"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 520px"
+                  className="object-cover drop-shadow-lg"
+                  loading="lazy"
+                  priority={false}
+                />
               </div>
               <div className="p-4 sm:p-6">
                 <span className="bg-[#dcfce7] text-[#16a34a] text-[0.55rem] sm:text-[0.6rem] font-bold px-2 py-0.5 rounded-[50px] tracking-[0.08em] uppercase">
@@ -195,11 +216,19 @@ export default function HomePage() {
 
             {/* Free Design Files */}
             <div
-              className="card overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+              className="card w-full max-w-[520px] shadow-xl overflow-hidden cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
               onClick={() => router.push('/templates')}
             >
-              <div className="h-[110px] sm:h-[160px] md:h-[180px] bg-gradient-to-br from-[#a8edea] to-[#fed6e3] flex items-center justify-center text-[2.2rem] sm:text-[3.2rem] md:text-[4rem]">
-                🎨
+              <div className="relative h-[110px] sm:h-[160px] md:h-[180px] w-full bg-gradient-to-br from-[#a8edea] to-[#fed6e3] overflow-hidden">
+                <Image
+                  src="/images/printing-services/free-design-logo.webp"
+                  alt="Free Design Files"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 520px"
+                  className="object-cover drop-shadow-lg"
+                  loading="lazy"
+                  priority={false}
+                />
               </div>
               <div className="p-4 sm:p-6">
                 <span className="bg-[#fef9c3] text-[#ca8a04] text-[0.55rem] sm:text-[0.6rem] font-bold px-2 py-0.5 rounded-[50px] tracking-[0.08em] uppercase">

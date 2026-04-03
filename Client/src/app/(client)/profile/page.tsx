@@ -82,7 +82,7 @@ export default function ProfilePage() {
                         <div className="flex flex-col gap-3">
                             <div className="p-3 bg-[#f0f4ff] rounded-[10px] border border-[#c7d9fd]">
                                 <div className="text-[0.65rem] font-bold text-[#4361ee] tracking-wider uppercase mb-1">Client ID</div>
-                                <div className="text-lg font-extrabold text-[#0f172a] tracking-wide">{profile?.client_code}</div>
+                                <div className="text-lg font-extrabold text-[#0f172a] tracking-wide">{profile?.phone_number}</div>
                             </div>
                             <div>
                                 <div className="text-xs text-[#94a3b8] mb-1">Account Status</div>

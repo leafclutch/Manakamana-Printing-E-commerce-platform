@@ -3,6 +3,8 @@
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
 import { useState } from "react";
+import { FaPhoneAlt } from "react-icons/fa";
+import { IoIosMail } from "react-icons/io";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -63,8 +65,8 @@ export default function ContactPage() {
                   Contact Details
                 </h2>
                 <div className="flex flex-col gap-1 text-sm text-slate-700 leading-relaxed">
-                  <div>
-                    <span className="text-[color:var(--primary)] mr-2">📞</span>
+                  <div className="flex items-center">
+                    <span className="text-[color:var(--primary)] mr-2"><FaPhoneAlt /></span>
                     <span>
                       <a
                         href="tel:+9779804458995"
@@ -75,8 +77,8 @@ export default function ContactPage() {
                       <span className="text-slate-400">(Office)</span>
                     </span>
                   </div>
-                  <div>
-                    <span className="text-[color:var(--primary)] mr-2">📞</span>
+                  <div className="flex items-center">
+                    <span className="text-[color:var(--primary)] mr-2"><FaPhoneAlt /></span>
                     <span>
                       <a
                         href="tel:+9779847526152"
@@ -87,8 +89,8 @@ export default function ContactPage() {
                       <span className="text-slate-400">(Sagar Kapoor)</span>
                     </span>
                   </div>
-                  <div>
-                    <span className="text-[color:var(--primary)] mr-2">📞</span>
+                  <div className="flex items-center">
+                    <span className="text-[color:var(--primary)] mr-2"><FaPhoneAlt /></span>
                     <span>
                       <a
                         href="tel:+9779806955313"
@@ -100,7 +102,7 @@ export default function ContactPage() {
                     </span>
                   </div>
                   <div className="flex items-center mt-2">
-                    <span className="text-[color:var(--primary)] mr-2">✉️</span>
+                    <span className="text-[color:var(--primary)] mr-2"><IoIosMail size={20} /></span>
                     <a
                       href="mailto:nmpress2082@gmail.com"
                       className="text-blue-600 font-semibold"

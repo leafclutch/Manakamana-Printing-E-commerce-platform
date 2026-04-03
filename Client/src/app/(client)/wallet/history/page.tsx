@@ -2,6 +2,7 @@
 
 import { useWalletStore } from "@/store/useWalletStore";
 import React, { useEffect, useState } from "react";
+import { BiWallet } from "react-icons/bi";
 import { FaMoneyBillWave, FaArrowDown, FaArrowUp, FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 
@@ -40,14 +41,14 @@ export default function TransactionHistoryPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-                        <FaMoneyBillWave className="text-green-600" /> Transaction History
+                        <BiWallet className="text-green-600" /> Transaction History
                     </h1>
                     <p className="text-gray-500">View your wallet deposits and payments</p>
                 </div>
                 
                 <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
                     <div className="p-3 bg-green-50 rounded-lg text-green-600">
-                        <FaMoneyBillWave className="text-2xl" />
+                        <BiWallet className="text-2xl" />
                     </div>
                     <div>
                         <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Current Balance</p>

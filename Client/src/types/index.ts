@@ -129,3 +129,11 @@ export interface ProductConfig {
   calculatePrice: (product: BackendProduct, state: Record<string, string>) => { applicableCost: number; discount: number };
   renderInfo: (product: BackendProduct) => React.ReactNode;
 }
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: "ORDER" | "WALLET" | "SYSTEM";
+  isRead: boolean;
+  createdAt: string;
+}
