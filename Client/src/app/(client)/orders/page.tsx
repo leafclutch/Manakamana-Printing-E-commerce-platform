@@ -20,6 +20,8 @@ export default function OrdersPage() {
     const { fetchMyOrders, myOrders } = useIDCardStore()
     const [statusFilter, setStatusFilter] = useState("ALL");
     const [search, setSearch] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 10;
 
     // Safely extract product name from order
     const getProductName = (order: any) => {
@@ -47,6 +49,15 @@ export default function OrdersPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [statusFilter, search]);
+
+    const totalPages = Math.ceil(filtered.length / pageSize);
+    const paginatedOrders = filtered.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
 
     return (
         <div className="p-3 sm:p-6 md:p-10 max-w-7xl mx-auto">
@@ -62,7 +73,7 @@ export default function OrdersPage() {
                     href="/services"
                     className="btn-primary w-full sm:w-auto text-center"
                 >
-                    ➕ New Order
+                    New Order
                 </Link>
             </div>
 
@@ -113,14 +124,14 @@ export default function OrdersPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#e2e8f0]">
-                            {filtered.length === 0 ? (
+                            {paginatedOrders.length === 0 ? (
                                 <tr>
                                     <td colSpan={7} className="text-center p-12 text-[#94a3b8]">
                                         No orders found
                                     </td>
                                 </tr>
                             ) : (
-                                filtered.map((order) => (
+                                paginatedOrders.map((order) => (
                                     <tr key={order.id} className="hover:bg-[#f8fafc] transition-colors">
                                         <td className="p-4 text-[#1a56db] font-bold text-[0.8rem]">
                                             {order.id}
@@ -167,12 +178,12 @@ export default function OrdersPage() {
 
             {/* Cards for mobile: */}
             <div className="md:hidden flex flex-col gap-3">
-                {filtered.length === 0 ? (
+                {paginatedOrders.length === 0 ? (
                     <div className="bg-white text-[#94a3b8] text-center p-8 rounded-2xl border border-[#e2e8f0]">
                         No orders found
                     </div>
                 ) : (
-                    filtered.map((order) => (
+                    paginatedOrders.map((order) => (
                         <div
                             key={order.id}
                             className="bg-white rounded-2xl border border-[#e2e8f0] p-4 flex flex-col gap-2 shadow-sm"
@@ -214,10 +225,62 @@ export default function OrdersPage() {
                     ))
                 )}
             </div>
-            {/* Showing X of Y orders: show only "of Y" if loaded orders' total is available, otherwise show just X */}
-            <p className="text-right mt-4 text-[0.78rem] text-[#94a3b8]">
-                Showing {filtered.length} orders
-            </p>
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 py-4 border-t border-[#e2e8f0]">
+                    <p className="text-[0.78rem] text-[#64748b] font-medium order-2 sm:order-1">
+                        Showing <span className="text-[#0f172a] font-bold">{(currentPage - 1) * pageSize + 1}</span> to <span className="text-[#0f172a] font-bold">{Math.min(currentPage * pageSize, filtered.length)}</span> of <span className="text-[#0f172a] font-bold">{filtered.length}</span> orders
+                    </p>
+                    
+                    <div className="flex items-center gap-2 order-1 sm:order-2">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className={`p-2 rounded-lg border border-[#e2e8f0] transition-colors ${
+                                currentPage === 1 
+                                ? "text-[#cbd5e1] cursor-not-allowed bg-gray-50" 
+                                : "text-[#475569] hover:bg-[#f8fafc] active:scale-95"
+                            }`}
+                        >
+                            <span className="text-sm font-bold">← Previous</span>
+                        </button>
+
+                        <div className="flex items-center gap-1 mx-2">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-[0.8rem] font-bold transition-all ${
+                                        currentPage === page
+                                        ? "bg-gradient-to-r from-[#1a56db] to-[#2563eb] text-white shadow-md shadow-blue-100 scale-105"
+                                        : "text-[#475569] hover:bg-[#f1f5f9]"
+                                    }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className={`p-2 rounded-lg border border-[#e2e8f0] transition-colors ${
+                                currentPage === totalPages 
+                                ? "text-[#cbd5e1] cursor-not-allowed bg-gray-50" 
+                                : "text-[#475569] hover:bg-[#f8fafc] active:scale-95"
+                            }`}
+                        >
+                            <span className="text-sm font-bold">Next →</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {!totalPages && (
+                <p className="text-right mt-4 text-[0.78rem] text-[#94a3b8]">
+                    No orders to display
+                </p>
+            )}
         </div>
     );
 }
