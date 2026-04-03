@@ -45,7 +45,7 @@ export async function PATCH(
   const hasBody = rawBody.trim().length > 0;
 
   const apiResponse = await fetch(
-    `${API_BASE_URL}/admin/designs/submissions/${submission_id}/reject`,
+    `${API_BASE_URL}/admin/design-submissions/${submission_id}/reject`,
     {
       method: "PATCH",
       headers: {

@@ -14,27 +14,25 @@ export interface DesignListItem {
 }
 
 interface PendingDesignApi {
-  id: string;
-  designCode: string;
-  fileUrl: string;
-  previewUrl?: string | null;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  createdAt: string;
+  submissionId: string;
+  title: string;
+  status: "PENDING_REVIEW" | "APPROVED" | "REJECTED";
+  submittedAt: string;
   client?: {
-    companyName?: string | null;
-    email?: string | null;
+    id?: string | null;
+    name?: string | null;
+    phone?: string | null;
   } | null;
 }
 
 interface ApprovedDesignApi {
-  id: string;
-  designCode: string;
-  previewUrl?: string | null;
-  status: "APPROVED";
-  reviewedAt?: string | null;
-  createdAt: string;
+  designId: string;
+  status: "APPROVED" | "ARCHIVED";
+  approvedAt?: string | null;
+  submissionId?: string | null;
   client?: {
-    companyName?: string | null;
+    id?: string | null;
+    name?: string | null;
   } | null;
 }
 
@@ -57,28 +55,25 @@ const safeJson = async (response: Response) => {
 };
 
 const mapPendingDesign = (design: PendingDesignApi): DesignListItem => ({
-  id: design.id,
-  title: design.designCode || `Design Submission ${design.id.slice(0, 6)}`,
-  client: design.client?.companyName || "Unknown Client",
-  designer: design.client?.companyName || "Client",
-  submittedDate: formatDate(design.createdAt),
+  id: design.submissionId,
+  title: design.title || `Design Submission ${design.submissionId.slice(0, 6)}`,
+  client: design.client?.name || "Unknown Client",
+  designer: design.client?.name || "Client",
+  submittedDate: formatDate(design.submittedAt),
   status: "Pending",
-  image: design.previewUrl || design.fileUrl,
-  fileUrl: design.fileUrl,
-  previewUrl: design.previewUrl ?? undefined,
-  designCode: design.designCode,
+  image: "",
+  designCode: undefined,
 });
 
 const mapApprovedDesign = (design: ApprovedDesignApi): DesignListItem => ({
-  id: design.id,
-  title: design.designCode || `Approved Design ${design.id.slice(0, 6)}`,
-  client: design.client?.companyName || "Unknown Client",
-  designer: design.client?.companyName || "Client",
-  submittedDate: formatDate(design.reviewedAt || design.createdAt),
+  id: design.designId,
+  title: design.designId || `Approved Design ${design.designId.slice(0, 6)}`,
+  client: design.client?.name || "Unknown Client",
+  designer: design.client?.name || "Client",
+  submittedDate: formatDate(design.approvedAt || ""),
   status: "Approved",
-  image: design.previewUrl || "",
-  previewUrl: design.previewUrl ?? undefined,
-  designCode: design.designCode,
+  image: "",
+  designCode: design.designId,
 });
 
 export const fetchPendingDesignSubmissions = async (): Promise<DesignListItem[]> => {
@@ -92,7 +87,7 @@ export const fetchPendingDesignSubmissions = async (): Promise<DesignListItem[]>
     throw new Error(data?.message || "Failed to load design submissions.");
   }
 
-  return (data?.data || []).map(mapPendingDesign);
+  return (data?.data?.items || []).map(mapPendingDesign);
 };
 
 export const fetchApprovedDesigns = async (): Promise<DesignListItem[]> => {
@@ -106,17 +101,17 @@ export const fetchApprovedDesigns = async (): Promise<DesignListItem[]> => {
     throw new Error(data?.message || "Failed to load approved designs.");
   }
 
-  return (data?.data || []).map(mapApprovedDesign);
+  return (data?.data?.items || []).map(mapApprovedDesign);
 };
 
 export const approveDesignSubmission = async (
   submissionId: string,
-  previewUrl: string
+  note?: string
 ) => {
   const response = await fetch("/api/admin/designs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ submissionId, previewUrl }),
+    body: JSON.stringify({ submissionId, note }),
   });
 
   const data = await safeJson(response);
@@ -136,7 +131,7 @@ export const rejectDesignSubmission = async (
     {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ feedbackMessage: reason }),
     }
   );
 

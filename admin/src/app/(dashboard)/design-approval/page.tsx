@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -99,21 +99,11 @@ export default function DesignApprovalPage() {
   }, []);
 
   const handleApprove = async (id: string) => {
-    const previewUrl = window.prompt("Enter preview URL for this design:");
-    if (!previewUrl) {
-      toast({ title: "Preview URL required", description: "Approval cancelled." });
-      return;
-    }
+    const note = window.prompt("Add a review note (optional):") || undefined;
     setActionId(id);
     try {
-      await approveDesignSubmission(id, previewUrl);
-      setDesigns((prev) =>
-        prev.map((d) =>
-          d.id === id
-            ? { ...d, status: "Approved", previewUrl, image: previewUrl }
-            : d
-        )
-      );
+      await approveDesignSubmission(id, note);
+      await loadDesigns();
       toast({
         title: "Design Approved",
         description: "The design has been approved for printing.",
@@ -123,7 +113,11 @@ export default function DesignApprovalPage() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to approve design.";
-      toast({ title: "Approval Failed", description: message, variant: "destructive" });
+      toast({
+        title: "Approval Failed",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setActionId(null);
     }
@@ -297,7 +291,7 @@ export default function DesignApprovalPage() {
                     <span className="font-medium text-slate-700 dark:text-slate-300">
                       {design.client}
                     </span>
-                    {" · "}
+                    {" � "}
                     <span className="font-mono">{design.id}</span>
                   </p>
                 </CardContent>
@@ -352,7 +346,7 @@ export default function DesignApprovalPage() {
             <DialogTitle className="text-lg">{selectedDesign?.title}</DialogTitle>
             <DialogDescription>
               Submitted by <strong>{selectedDesign?.designer}</strong> for{" "}
-              {selectedDesign?.client} · {selectedDesign?.id}
+              {selectedDesign?.client} � {selectedDesign?.id}
             </DialogDescription>
           </DialogHeader>
           <div className="aspect-video w-full overflow-hidden rounded-lg bg-slate-100 shadow-inner dark:bg-slate-800">
@@ -444,3 +438,5 @@ export default function DesignApprovalPage() {
     </div>
   );
 }
+
+

@@ -21,10 +21,16 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   approveAdminTopupRequest,
+  createAdminPaymentDetails,
+  fetchAdminClientWalletSummary,
   fetchAdminTopupRequestById,
   fetchAdminTopupRequests,
+  fetchAdminWalletNotifications,
   fetchAdminWalletTransactions,
+  markAdminWalletNotificationRead,
   rejectAdminTopupRequest,
+  type WalletClientSummaryApi,
+  type WalletNotificationApi,
   type WalletTopupDetailApi,
   type WalletTopupListItemApi,
   type WalletTransactionApi,
@@ -35,6 +41,8 @@ import {
   Receipt,
   Search,
   XCircle,
+  Bell,
+  Wallet,
 } from "lucide-react";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -75,12 +83,18 @@ const formatPaymentMethod = (method?: string | null) => {
 export default function PaymentsPage() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [topupRequests, setTopupRequests] = useState<WalletTopupListItemApi[]>([]);
+  const [topupRequests, setTopupRequests] = useState<WalletTopupListItemApi[]>(
+    []
+  );
   const [transactions, setTransactions] = useState<WalletTransactionApi[]>([]);
+  const [notifications, setNotifications] = useState<WalletNotificationApi[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedTopup, setSelectedTopup] = useState<WalletTopupDetailApi | null>(null);
+  const [selectedTopup, setSelectedTopup] =
+    useState<WalletTopupDetailApi | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
@@ -89,19 +103,40 @@ export default function PaymentsPage() {
   const [approveAmount, setApproveAmount] = useState("");
   const [approveNote, setApproveNote] = useState("");
 
+  const [paymentForm, setPaymentForm] = useState({
+    companyName: "",
+    bankName: "",
+    accountName: "",
+    accountNumber: "",
+    branch: "",
+    paymentId: "",
+    qrImageUrl: "",
+    note: "",
+  });
+
+  const [clientLookupId, setClientLookupId] = useState("");
+  const [clientSummary, setClientSummary] =
+    useState<WalletClientSummaryApi | null>(null);
+  const [clientSummaryLoading, setClientSummaryLoading] = useState(false);
+
   const loadData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [topupsResponse, transactionsResponse] = await Promise.all([
-        fetchAdminTopupRequests({ page: 1, limit: 50 }),
-        fetchAdminWalletTransactions({ page: 1, limit: 50 }),
-      ]);
+      const [topupsResponse, transactionsResponse, notificationsResponse] =
+        await Promise.all([
+          fetchAdminTopupRequests({ page: 1, limit: 50 }),
+          fetchAdminWalletTransactions({ page: 1, limit: 50 }),
+          fetchAdminWalletNotifications({ page: 1, limit: 20 }),
+        ]);
 
       setTopupRequests(topupsResponse.data.items || []);
       setTransactions(transactionsResponse.data.items || []);
+      setNotifications(notificationsResponse.data.items || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load wallet data.");
+      setError(
+        err instanceof Error ? err.message : "Failed to load wallet data."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -126,8 +161,12 @@ export default function PaymentsPage() {
   const pendingCount = topupRequests.filter(
     (t) => t.status === "PENDING_REVIEW"
   ).length;
-  const approvedCount = topupRequests.filter((t) => t.status === "APPROVED").length;
-  const rejectedCount = topupRequests.filter((t) => t.status === "REJECTED").length;
+  const approvedCount = topupRequests.filter(
+    (t) => t.status === "APPROVED"
+  ).length;
+  const rejectedCount = topupRequests.filter(
+    (t) => t.status === "REJECTED"
+  ).length;
 
   const openDetail = async (request: WalletTopupListItemApi) => {
     setIsDetailOpen(true);
@@ -177,7 +216,9 @@ export default function PaymentsPage() {
         variant: "success",
       });
       await loadData();
-      const refreshed = await fetchAdminTopupRequestById(selectedTopup.requestId);
+      const refreshed = await fetchAdminTopupRequestById(
+        selectedTopup.requestId
+      );
       setSelectedTopup(refreshed.data);
     } catch (err) {
       toast({
@@ -213,11 +254,85 @@ export default function PaymentsPage() {
       setRejectReason("");
       setRejectReasonCode("");
       await loadData();
-      const refreshed = await fetchAdminTopupRequestById(selectedTopup.requestId);
+      const refreshed = await fetchAdminTopupRequestById(
+        selectedTopup.requestId
+      );
       setSelectedTopup(refreshed.data);
     } catch (err) {
       toast({
         title: "Rejection failed",
+        description: err instanceof Error ? err.message : "Try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSavePaymentDetails = async () => {
+    try {
+      await createAdminPaymentDetails({
+        companyName: paymentForm.companyName,
+        bankName: paymentForm.bankName,
+        accountName: paymentForm.accountName,
+        accountNumber: paymentForm.accountNumber,
+        branch: paymentForm.branch || undefined,
+        paymentId: paymentForm.paymentId || undefined,
+        qrImageUrl: paymentForm.qrImageUrl || undefined,
+        note: paymentForm.note || undefined,
+        isActive: true,
+      });
+      toast({
+        title: "Payment details saved",
+        description: "Clients will see the updated details immediately.",
+        variant: "success",
+      });
+    } catch (err) {
+      toast({
+        title: "Save failed",
+        description: err instanceof Error ? err.message : "Try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClientLookup = async () => {
+    if (!clientLookupId.trim()) {
+      toast({
+        title: "Client ID required",
+        description: "Enter a client ID to fetch wallet summary.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setClientSummaryLoading(true);
+    try {
+      const response = await fetchAdminClientWalletSummary(
+        clientLookupId.trim()
+      );
+      setClientSummary(response.data);
+    } catch (err) {
+      toast({
+        title: "Lookup failed",
+        description: err instanceof Error ? err.message : "Try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setClientSummaryLoading(false);
+    }
+  };
+
+  const handleMarkNotificationRead = async (notificationId: string) => {
+    try {
+      await markAdminWalletNotificationRead(notificationId);
+      setNotifications((prev) =>
+        prev.map((note) =>
+          note.notificationId === notificationId
+            ? { ...note, isRead: true }
+            : note
+        )
+      );
+    } catch (err) {
+      toast({
+        title: "Update failed",
         description: err instanceof Error ? err.message : "Try again.",
         variant: "destructive",
       });
@@ -302,6 +417,125 @@ export default function PaymentsPage() {
           </Card>
         ))}
       </div>
+
+      <Card className="border-slate-200/80 shadow-sm dark:border-slate-800">
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">
+            Payment Details
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Company Name</Label>
+            <Input
+              value={paymentForm.companyName}
+              onChange={(event) =>
+                setPaymentForm((prev) => ({
+                  ...prev,
+                  companyName: event.target.value,
+                }))
+              }
+              placeholder="Manakamana Printing Press"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Bank Name</Label>
+            <Input
+              value={paymentForm.bankName}
+              onChange={(event) =>
+                setPaymentForm((prev) => ({
+                  ...prev,
+                  bankName: event.target.value,
+                }))
+              }
+              placeholder="Himalayan Bank"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Account Name</Label>
+            <Input
+              value={paymentForm.accountName}
+              onChange={(event) =>
+                setPaymentForm((prev) => ({
+                  ...prev,
+                  accountName: event.target.value,
+                }))
+              }
+              placeholder="Manakamana Printing Press"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Account Number</Label>
+            <Input
+              value={paymentForm.accountNumber}
+              onChange={(event) =>
+                setPaymentForm((prev) => ({
+                  ...prev,
+                  accountNumber: event.target.value,
+                }))
+              }
+              placeholder="0012345678"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Branch</Label>
+            <Input
+              value={paymentForm.branch}
+              onChange={(event) =>
+                setPaymentForm((prev) => ({
+                  ...prev,
+                  branch: event.target.value,
+                }))
+              }
+              placeholder="Kathmandu"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Payment ID</Label>
+            <Input
+              value={paymentForm.paymentId}
+              onChange={(event) =>
+                setPaymentForm((prev) => ({
+                  ...prev,
+                  paymentId: event.target.value,
+                }))
+              }
+              placeholder="company@upi"
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>QR Image URL</Label>
+            <Input
+              value={paymentForm.qrImageUrl}
+              onChange={(event) =>
+                setPaymentForm((prev) => ({
+                  ...prev,
+                  qrImageUrl: event.target.value,
+                }))
+              }
+              placeholder="https://..."
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label>Notes</Label>
+            <Input
+              value={paymentForm.note}
+              onChange={(event) =>
+                setPaymentForm((prev) => ({
+                  ...prev,
+                  note: event.target.value,
+                }))
+              }
+              placeholder="Optional instructions for clients"
+            />
+          </div>
+          <div className="md:col-span-2 flex justify-end">
+            <Button className="gap-2" onClick={handleSavePaymentDetails}>
+              Save Payment Details
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="border-b border-slate-100 dark:border-slate-800">
@@ -489,6 +723,133 @@ export default function PaymentsPage() {
         </CardContent>
       </Card>
 
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card className="border-slate-200/80 shadow-sm dark:border-slate-800">
+          <CardHeader className="border-b border-slate-100 dark:border-slate-800">
+            <CardTitle className="text-base font-semibold">
+              Notifications
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 p-5">
+            {notifications.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800">
+                No notifications yet.
+              </div>
+            ) : (
+              notifications.map((note) => (
+                <div
+                  key={note.notificationId}
+                  className={`rounded-lg border p-4 ${
+                    note.isRead
+                      ? "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+                      : "border-blue-200 bg-blue-50 dark:border-blue-900/40 dark:bg-blue-900/20"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                        {note.title}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {note.message}
+                      </p>
+                      <p className="mt-2 text-[11px] text-slate-400">
+                        {formatDate(note.createdAt)}
+                      </p>
+                    </div>
+                    {!note.isRead ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          void handleMarkNotificationRead(note.notificationId)
+                        }
+                      >
+                        Mark read
+                      </Button>
+                    ) : (
+                      <Bell className="h-4 w-4 text-slate-400" />
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200/80 shadow-sm dark:border-slate-800">
+          <CardHeader className="border-b border-slate-100 dark:border-slate-800">
+            <CardTitle className="text-base font-semibold">
+              Client Wallet Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 p-5">
+            <div className="space-y-2">
+              <Label>Client ID</Label>
+              <Input
+                value={clientLookupId}
+                onChange={(event) => setClientLookupId(event.target.value)}
+                placeholder="CL-1051"
+              />
+            </div>
+            <Button
+              className="w-full gap-2"
+              onClick={() => void handleClientLookup()}
+              disabled={clientSummaryLoading}
+            >
+              <Wallet className="h-4 w-4" />
+              {clientSummaryLoading ? "Fetching..." : "Fetch Wallet Summary"}
+            </Button>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+              {clientSummary ? (
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs uppercase text-slate-400">Client</p>
+                    <p className="font-semibold text-slate-900 dark:text-white">
+                      {clientSummary.client.name}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {clientSummary.client.id}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold">Available Balance</span>
+                    <span className="text-lg font-bold text-slate-900 dark:text-white">
+                      {formatCurrency(
+                        clientSummary.availableBalance,
+                        clientSummary.currency
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span>Total Credits</span>
+                    <span>
+                      {formatCurrency(
+                        clientSummary.totalCredits,
+                        clientSummary.currency
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span>Total Debits</span>
+                    <span>
+                      {formatCurrency(
+                        clientSummary.totalDebits,
+                        clientSummary.currency
+                      )}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-xs text-slate-500">
+                  Enter a client ID to view wallet balances and totals.
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
@@ -542,7 +903,9 @@ export default function PaymentsPage() {
                     </p>
                   </div>
                   <div className="col-span-2">
-                    <p className="text-xs uppercase text-slate-400">Client note</p>
+                    <p className="text-xs uppercase text-slate-400">
+                      Client note
+                    </p>
                     <p className="text-sm text-slate-600 dark:text-slate-300">
                       {selectedTopup.note || "No additional note."}
                     </p>
@@ -555,7 +918,9 @@ export default function PaymentsPage() {
                   <ul className="mt-2 space-y-1">
                     <li>Compare amount and reference with bank statement.</li>
                     <li>Ensure the payer name matches the client record.</li>
-                    <li>Confirm transfer date is within 24 hours of submission.</li>
+                    <li>
+                      Confirm transfer date is within 24 hours of submission.
+                    </li>
                   </ul>
                 </div>
                 {selectedTopup.rejectionReason ? (
@@ -614,7 +979,9 @@ export default function PaymentsPage() {
                         type="number"
                         min={0}
                         value={approveAmount}
-                        onChange={(event) => setApproveAmount(event.target.value)}
+                        onChange={(event) =>
+                          setApproveAmount(event.target.value)
+                        }
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -698,7 +1065,3 @@ export default function PaymentsPage() {
     </div>
   );
 }
-
-
-
-

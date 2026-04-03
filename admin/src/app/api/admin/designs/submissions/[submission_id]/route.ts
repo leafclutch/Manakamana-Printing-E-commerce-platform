@@ -43,7 +43,7 @@ export async function GET(
   const { submission_id } = await context.params;
 
   const apiResponse = await fetch(
-    `${API_BASE_URL}/admin/designs/submissions/${submission_id}`,
+    `${API_BASE_URL}/admin/design-submissions/${submission_id}`,
     {
       method: "GET",
       headers: {

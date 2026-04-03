@@ -2,8 +2,10 @@ import { LoginPayload, LoginResponse } from "@/types/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export const loginUser = async (credentials: LoginPayload): Promise<LoginResponse> => {
-  const response = await fetch(`${API_BASE_URL}/admin/login`, {
+export const loginUser = async (
+  credentials: LoginPayload
+): Promise<LoginResponse> => {
+  const response = await fetch(`${API_BASE_URL}/admin/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

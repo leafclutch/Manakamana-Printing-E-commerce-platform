@@ -7,6 +7,14 @@ const PROTECTED_PATHS = [
   "/registration-requests",
   "/orders",
   "/payments",
+  "/clients",
+  "/templates",
+  "/products",
+  "/product-fields",
+  "/pricing",
+  "/templates",
+  "/services",
+  "/idcards",
   "/settings",
   "/design-approval",
 ];
@@ -34,3 +42,4 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
+

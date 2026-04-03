@@ -7,20 +7,20 @@ const AUTH_FLAG_COOKIE = "admin-auth";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { client_id, password } = body;
+    const { email, password } = body;
 
-    if (!client_id || !password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { message: "Client ID and password are required." },
+        { message: "Email and password are required." },
         { status: 400 }
       );
     }
 
-    const endpoint = `${API_BASE_URL}/admin/login`;
+    const endpoint = `${API_BASE_URL}/admin/auth/login`;
     const apiResponse = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ client_id, password }),
+      body: JSON.stringify({ email, password }),
     });
 
     const contentType = apiResponse.headers.get("content-type") || "";
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     // On successful login, set the token in a secure cookie
     const response = NextResponse.json({
       success: true,
-      user: data.user,
+      user: data.admin,
     });
 
     response.cookies.set(AUTH_TOKEN_COOKIE, data.token, {

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [clientId, setClientId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,7 @@ export default function LoginPage() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ client_id: clientId, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
@@ -70,15 +70,15 @@ export default function LoginPage() {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <Label htmlFor="clientId">Client ID</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
-                  id="clientId"
-                  type="text"
-                  value={clientId}
-                  onChange={(event) => setClientId(event.target.value)}
-                  placeholder="ADMIN-001"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="admin@gmail.com"
                   className="h-11 border-slate-200 pl-9 focus-visible:ring-[#0061FF]"
                   autoComplete="username"
                   required

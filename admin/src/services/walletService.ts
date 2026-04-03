@@ -64,6 +64,34 @@ export interface WalletTransactionResponseApi {
   };
 }
 
+export interface WalletNotificationApi {
+  notificationId: string;
+  type: string;
+  title: string;
+  message: string;
+  referenceId?: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface WalletNotificationResponseApi {
+  items: WalletNotificationApi[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+  };
+}
+
+export interface WalletClientSummaryApi {
+  client: { id: string; name: string; phone?: string | null };
+  currency: string;
+  availableBalance: number;
+  totalCredits: number;
+  totalDebits: number;
+}
+
 const safeJson = async (response: Response) => {
   const raw = await response.text();
   if (!raw || raw.trim().length === 0) {
@@ -222,4 +250,87 @@ export const fetchAdminWalletTransactions = async (params?: {
   }
 
   return data as { success: boolean; data: WalletTransactionResponseApi };
+};
+
+export const createAdminPaymentDetails = async (payload: {
+  companyName: string;
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  branch?: string;
+  paymentId?: string;
+  qrImageUrl?: string;
+  note?: string;
+  isActive?: boolean;
+}) => {
+  const response = await fetch(`/api/admin/wallet/payment-details`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await safeJson(response);
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to save payment details.");
+  }
+
+  return data as { success: boolean; message: string; data?: unknown };
+};
+
+export const fetchAdminWalletNotifications = async (params?: {
+  isRead?: boolean;
+  page?: number;
+  limit?: number;
+}) => {
+  const query = new URLSearchParams();
+  if (params?.isRead !== undefined) query.set("isRead", String(params.isRead));
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+
+  const response = await fetch(
+    `/api/admin/wallet/notifications${query.toString() ? `?${query}` : ""}`,
+    {
+      method: "GET",
+      cache: "no-store",
+    }
+  );
+
+  const data = await safeJson(response);
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to load notifications.");
+  }
+
+  return data as { success: boolean; data: WalletNotificationResponseApi };
+};
+
+export const markAdminWalletNotificationRead = async (notificationId: string) => {
+  const response = await fetch(
+    `/api/admin/wallet/notifications/${notificationId}/read`,
+    {
+      method: "PATCH",
+    }
+  );
+
+  const data = await safeJson(response);
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to mark notification as read.");
+  }
+
+  return data as { success: boolean; message: string };
+};
+
+export const fetchAdminClientWalletSummary = async (clientId: string) => {
+  const response = await fetch(`/api/admin/wallet/clients/${clientId}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  const data = await safeJson(response);
+  if (!response.ok) {
+    throw new Error(data?.message || "Failed to load client wallet summary.");
+  }
+
+  return data as { success: boolean; data: WalletClientSummaryApi };
 };

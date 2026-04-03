@@ -53,7 +53,7 @@ export async function GET(
   return toJsonResponse(apiResponse);
 }
 
-export async function DELETE(
+export async function PATCH(
   request: Request,
   context: { params: Promise<{ design_id: string }> }
 ) {
@@ -67,13 +67,20 @@ export async function DELETE(
 
   const { design_id } = await context.params;
 
-  const apiResponse = await fetch(`${API_BASE_URL}/admin/designs/${design_id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
+  const body = await request.json().catch(() => ({}));
+
+  const apiResponse = await fetch(
+    `${API_BASE_URL}/admin/designs/${design_id}/archive`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body ?? {}),
+      cache: "no-store",
+    }
+  );
 
   return toJsonResponse(apiResponse);
 }

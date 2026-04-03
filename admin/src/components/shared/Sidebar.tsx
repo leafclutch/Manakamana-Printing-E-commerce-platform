@@ -12,33 +12,45 @@ import {
   Wallet,
   Settings,
   LogOut,
+  Users,
+  Layers,
+  ListTree,
+  BadgeDollarSign,
+  FileText,
+  Boxes,
+  IdCard,
 } from "lucide-react";
 
-const navItems = [
+const navSections = [
   {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
+    label: "Operations",
+    items: [
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      {
+        title: "Registration Requests",
+        href: "/registration-requests",
+        icon: UserPlus,
+      },
+      { title: "Clients", href: "/clients", icon: Users },
+      { title: "Designs", href: "/design-approval", icon: CheckCircle },
+      { title: "Wallet", href: "/payments", icon: Wallet },
+      { title: "Orders", href: "/orders", icon: Package },
+      { title: "ID Cards", href: "/idcards", icon: IdCard },
+    ],
   },
   {
-    title: "Registration Requests",
-    href: "/registration-requests",
-    icon: UserPlus,
+    label: "Setup",
+    items: [
+      { title: "Services", href: "/services", icon: FileText },
+      { title: "Products", href: "/products", icon: Boxes },
+      { title: "Product Fields", href: "/product-fields", icon: ListTree },
+      { title: "Pricing", href: "/pricing", icon: BadgeDollarSign },
+      { title: "Templates", href: "/templates", icon: Layers },
+    ],
   },
   {
-    title: "Order Management",
-    href: "/orders",
-    icon: Package,
-  },
-  {
-    title: "Design Approval",
-    href: "/design-approval",
-    icon: CheckCircle,
-  },
-  {
-    title: "Payments",
-    href: "/payments",
-    icon: Wallet,
+    label: "System",
+    items: [{ title: "Settings", href: "/settings", icon: Settings }],
   },
 ];
 
@@ -71,44 +83,32 @@ export function Sidebar() {
           </p>
         </div>
       </div>
-      <nav className="relative flex-1 space-y-1 px-4">
-        <div className="mb-2 mt-4 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Menu
-        </div>
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-[#0061FF] text-white shadow-lg shadow-[#0061FF]/30"
-                  : "text-slate-400 hover:bg-white/5 hover:text-white"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              <span>{item.title}</span>
-            </Link>
-          );
-        })}
-
-        <div className="mb-2 mt-8 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-          System
-        </div>
-        <Link
-          href="/settings"
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-            pathname === "/settings"
-              ? "bg-[#0061FF] text-white shadow-lg shadow-[#0061FF]/30"
-              : "text-slate-400 hover:bg-white/5 hover:text-white"
-          )}
-        >
-          <Settings className="h-5 w-5" />
-          <span>Settings</span>
-        </Link>
+      <nav className="sidebar-scroll relative flex-1 min-h-0 overflow-y-auto space-y-6 px-4 pb-6">
+        {navSections.map((section) => (
+          <div key={section.label} className="space-y-1">
+            <div className="mb-2 mt-4 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              {section.label}
+            </div>
+            {section.items.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-[#0061FF] text-white shadow-lg shadow-[#0061FF]/30"
+                      : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.title}</span>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
       <div className="relative mt-auto border-t border-slate-800 p-4">
         <div className="flex items-center justify-between gap-2 px-2">
@@ -138,3 +138,4 @@ export function Sidebar() {
     </aside>
   );
 }
+

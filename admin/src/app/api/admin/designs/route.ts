@@ -57,18 +57,30 @@ export async function POST(request: Request) {
     );
   }
 
-  const rawBody = await request.text();
-  const hasBody = rawBody.trim().length > 0;
+  const body = await request.json().catch(() => ({}));
+  const submissionId = body?.submissionId as string | undefined;
 
-  const apiResponse = await fetch(`${API_BASE_URL}/admin/designs`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(hasBody ? { "Content-Type": "application/json" } : {}),
-    },
-    body: hasBody ? rawBody : undefined,
-    cache: "no-store",
-  });
+  if (!submissionId) {
+    return NextResponse.json(
+      { message: "submissionId is required." },
+      { status: 400 }
+    );
+  }
+
+  const payload = body?.note ? { note: body.note } : {};
+
+  const apiResponse = await fetch(
+    `${API_BASE_URL}/admin/design-submissions/${submissionId}/approve`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    }
+  );
 
   return toJsonResponse(apiResponse);
 }
