@@ -1,66 +1,65 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Notification } from "@/types";
+import { getAllNotifications, markNotificationAsRead } from "../api/notifiaction";
+
+// Notification type matching the given shape
+export interface Notification {
+  notificationId: string;
+  type: string;
+  title: string;
+  message: string;
+  referenceId?: string;
+  isRead: boolean;
+  createdAt: string;
+}
 
 interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
-  addNotification: (notification: Omit<Notification, "id" | "isRead" | "createdAt">) => void;
-  markAsRead: (id: string) => void;
+  fetchAllNotifications: () => Promise<void>;
+  markAsRead: (notificationId: string) => void;
   markAllAsRead: () => void;
   clearAll: () => void;
-  deleteNotification: (id: string) => void;
+  deleteNotification: (notificationId: string) => void;
 }
 
 export const useNotificationStore = create<NotificationState>()(
   persist(
     (set, get) => ({
-      notifications: [
-        {
-          id: "1",
-          title: "Order Placed",
-          message: "Your ID Card order has been placed successfully.",
-          type: "ORDER",
-          isRead: false,
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          title: "Wallet Top-up",
-          message: "Your wallet top-up of Rs. 1000 was successful.",
-          type: "WALLET",
-          isRead: true,
-          createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-        }
-      ],
-      unreadCount: 1,
+      notifications: [],
+      unreadCount: 0,
 
-      addNotification: (notification) => {
-        const newNotif: Notification = {
-          ...notification,
-          id: Math.random().toString(36).substring(2, 9),
-          isRead: false,
-          createdAt: new Date().toISOString(),
-        };
-        set((state) => {
-          const updated = [newNotif, ...state.notifications];
-          return {
-            notifications: updated,
-            unreadCount: updated.filter((n) => !n.isRead).length,
-          };
-        });
+      fetchAllNotifications: async () => {
+        try {
+          const notifications: Notification[] = await getAllNotifications();
+          set({
+            notifications: notifications,
+            unreadCount: notifications.filter((n) => !n.isRead).length,
+          });
+        } catch (error) {
+          // Optionally handle error: set to empty or log etc.
+          set({
+            notifications: [],
+            unreadCount: 0,
+          });
+        }
       },
 
-      markAsRead: (id) => {
-        set((state) => {
-          const updated = state.notifications.map((n) =>
-            n.id === id ? { ...n, isRead: true } : n
-          );
-          return {
-            notifications: updated,
-            unreadCount: updated.filter((n) => !n.isRead).length,
-          };
-        });
+      markAsRead: async (notificationId) => {
+        try {
+          await markNotificationAsRead(notificationId);
+          set((state) => {
+            const updated = state.notifications.map((n) =>
+              n.notificationId === notificationId ? { ...n, isRead: true } : n
+            );
+            return {
+              notifications: updated,
+              unreadCount: updated.filter((n) => !n.isRead).length,
+            };
+          });
+        } catch (error) {
+          // Optionally handle error (e.g., show toast)
+        }
       },
 
       markAllAsRead: () => {
@@ -77,9 +76,9 @@ export const useNotificationStore = create<NotificationState>()(
         set({ notifications: [], unreadCount: 0 });
       },
 
-      deleteNotification: (id) => {
+      deleteNotification: (notificationId) => {
         set((state) => {
-          const updated = state.notifications.filter((n) => n.id !== id);
+          const updated = state.notifications.filter((n) => n.notificationId !== notificationId);
           return {
             notifications: updated,
             unreadCount: updated.filter((n) => !n.isRead).length,

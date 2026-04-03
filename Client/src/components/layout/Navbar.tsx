@@ -87,7 +87,7 @@ export default function Navbar() {
                 <div className="flex items-center gap-3">
                     {isAuthenticated ? (
                         <div className="flex gap-2 items-center">
-{/* 
+
                             <Link 
                                 href="/notifications"
                                 className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors group h-10 w-10 flex items-center justify-center border border-gray-200"
@@ -98,7 +98,7 @@ export default function Navbar() {
                                         {unreadCount > 9 ? '9+' : unreadCount}
                                     </span>
                                 )}
-                            </Link> */}
+                            </Link>
 
                             <div 
                                 onClick={() => { setIsWalletOpen(!isWalletOpen); setIsProfileOpen(false); }}

@@ -4,14 +4,14 @@ import { useNotificationStore } from "@/store/notificationStore";
 import { FaBell, FaCheckDouble, FaTrashAlt, FaShoppingBag, FaWallet, FaInfoCircle } from "react-icons/fa";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function NotificationsPage() {
     const { 
-        notifications, 
-        markAsRead, 
-        markAllAsRead, 
-        clearAll, 
-        deleteNotification 
+        notifications,
+        fetchAllNotifications,
+        markAllAsRead,
+        markAsRead
     } = useNotificationStore();
 
     const getIcon = (type: string) => {
@@ -21,6 +21,14 @@ export default function NotificationsPage() {
             default: return <FaInfoCircle className="text-amber-500" />;
         }
     };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchAllNotifications();
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+    
 
     return (
         <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -37,7 +45,7 @@ export default function NotificationsPage() {
                         </div>
                     </div>
 
-                    {notifications.length > 0 && (
+                    {/* {notifications.length > 0 && (
                         <div className="flex gap-2">
                             <button
                                 onClick={markAllAsRead}
@@ -54,16 +62,16 @@ export default function NotificationsPage() {
                                 Clear all
                             </button>
                         </div>
-                    )}
+                    )} */}
                 </div>
 
                 {/* Notifications List */}
                 <div className="space-y-4">
                     <AnimatePresence mode="popLayout">
                         {notifications.length > 0 ? (
-                            notifications.map((notif) => (
+                            notifications.map((notif, idx) => (
                                 <motion.div
-                                    key={notif.id}
+                                    key={idx}
                                     layout
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -97,18 +105,18 @@ export default function NotificationsPage() {
                                         <div className="mt-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                             {!notif.isRead && (
                                                 <button
-                                                    onClick={() => markAsRead(notif.id)}
-                                                    className="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 underline underline-offset-4"
+                                                    onClick={() => markAsRead(notif.notificationId)}
+                                                    className="cursor-pointer text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 underline underline-offset-4"
                                                 >
                                                     Mark as read
                                                 </button>
                                             )}
-                                            <button
+                                            {/* <button
                                                 onClick={() => deleteNotification(notif.id)}
                                                 className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-600 underline underline-offset-4"
                                             >
                                                 Remove
-                                            </button>
+                                            </button> */}
                                         </div>
                                     </div>
                                 </motion.div>

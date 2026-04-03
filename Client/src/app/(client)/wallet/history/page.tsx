@@ -3,7 +3,7 @@
 import { useWalletStore } from "@/store/useWalletStore";
 import React, { useEffect, useState } from "react";
 import { BiWallet } from "react-icons/bi";
-import { FaMoneyBillWave, FaArrowDown, FaArrowUp, FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaMoneyBillWave, FaClock, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 
 export default function TransactionHistoryPage() {
@@ -11,7 +11,11 @@ export default function TransactionHistoryPage() {
     const { fetchTopupRequests, topupRequests, wallet } = useWalletStore()
 
     useEffect(() => {
-      fetchTopupRequests()
+    //   fetchTopupRequests();
+      const intervalId = setInterval(() => {
+        fetchTopupRequests();
+      }, 5000);
+      return () => clearInterval(intervalId);
     }, [])
     
 
