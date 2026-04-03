@@ -100,3 +100,32 @@ export const getClientWalletSummaryService = async (clientId: string) => {
     totalDebits: Number(totalDebits._sum.amount || 0),
   };
 };
+
+export const markAllNotificationsReadService = async (
+  recipientRole: string,
+  recipientId: string
+) => {
+    return prisma.notification.updateMany({
+        where: {
+            recipientId,
+            recipientRole: recipientRole as any,
+            isRead: false
+        },
+        data: {
+            isRead: true,
+            readAt: new Date()
+        }
+    });
+};
+
+export const clearAllNotificationsService = async (
+    recipientRole: string,
+    recipientId: string
+) => {
+    return prisma.notification.deleteMany({
+        where: {
+            recipientId,
+            recipientRole: recipientRole as any
+        }
+    });
+};

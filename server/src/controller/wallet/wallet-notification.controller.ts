@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getNotificationsService, markNotificationAsReadService, getClientWalletSummaryService } from "../../services/wallet/wallet-notification.service";
+import { getNotificationsService, markNotificationAsReadService, getClientWalletSummaryService, markAllNotificationsReadService, clearAllNotificationsService } from "../../services/wallet/wallet-notification.service";
 import { notificationQuerySchema } from "../../validators/wallet.validator";
 
 // getClientNotifications: Fetches unread and historical alerts for the currently logged-in client
@@ -88,4 +88,26 @@ export const getAdminClientWalletSummary = async (req: Request, res: Response) =
     console.error("Error fetching client wallet summary:", error);
     res.status(400).json({ success: false, message: error.message || "Failed" });
   }
+};
+
+export const markAllClientNotificationsRead = async (req: Request, res: Response) => {
+    try {
+        const clientId = (req as any).user.id;
+        await markAllNotificationsReadService("CLIENT", clientId);
+        res.status(200).json({ success: true, message: "All notifications marked as read" });
+    } catch (error: any) {
+        console.error("Error marking all notifications:", error);
+        res.status(400).json({ success: false, message: error.message || "Failed" });
+    }
+};
+
+export const clearAllClientNotifications = async (req: Request, res: Response) => {
+    try {
+        const clientId = (req as any).user.id;
+        await clearAllNotificationsService("CLIENT", clientId);
+        res.status(200).json({ success: true, message: "All notifications cleared" });
+    } catch (error: any) {
+        console.error("Error clearing notifications:", error);
+        res.status(400).json({ success: false, message: error.message || "Failed" });
+    }
 };

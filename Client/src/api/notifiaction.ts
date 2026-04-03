@@ -20,3 +20,23 @@ export const markNotificationAsRead = async (notificationId: string) => {
         throw error;
     }
 };
+
+// Mark all notifications as read
+export const markAllNotificationsAsRead = async () => {
+    try {
+        const response = await api.post('/v1/wallet/notifications/mark-all-read');
+        return response.data.data;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Clear all notifications
+export const clearAllNotifications = async () => {
+    try {
+        const response = await api.post('/v1/wallet/notifications/clear-all');
+        return response.data.data;
+    } catch (error) {
+        throw error;
+    }
+};

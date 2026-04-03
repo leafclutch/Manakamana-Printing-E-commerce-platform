@@ -5,7 +5,7 @@ import { getPaymentDetails } from "../../controller/wallet/payment-details.contr
 import { getWalletBalance, validateCheckout } from "../../controller/wallet/wallet-account.controller";
 import { submitTopupRequest, getMyTopupRequests, getMyTopupRequestById } from "../../controller/wallet/topup-request.controller";
 import { getWalletTransactions, confirmWalletPayment } from "../../controller/wallet/wallet-transaction.controller";
-import { getClientNotifications, markClientNotificationRead } from "../../controller/wallet/wallet-notification.controller";
+import { getClientNotifications, markClientNotificationRead, markAllClientNotificationsRead, clearAllClientNotifications } from "../../controller/wallet/wallet-notification.controller";
 
 const router = Router();
 
@@ -48,6 +48,8 @@ router.post("/validate-checkout", validateCheckout);
 // Notifications: Personal wallet-related push alerts
 router.get("/notifications", getClientNotifications);
 router.patch("/notifications/:notificationId/read", markClientNotificationRead);
+router.post("/notifications/mark-all-read", markAllClientNotificationsRead);
+router.post("/notifications/clear-all", clearAllClientNotifications);
 
 
 

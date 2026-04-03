@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getAllNotifications, markNotificationAsRead } from "../api/notifiaction";
+import {
+  getAllNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  clearAllNotifications,
+} from "../api/notifiaction";
 
 // Notification type matching the given shape
 export interface Notification {
@@ -62,23 +67,35 @@ export const useNotificationStore = create<NotificationState>()(
         }
       },
 
-      markAllAsRead: () => {
-        set((state) => {
-          const updated = state.notifications.map((n) => ({ ...n, isRead: true }));
-          return {
-            notifications: updated,
-            unreadCount: 0,
-          };
-        });
+      markAllAsRead: async () => {
+        try {
+          await markAllNotificationsAsRead();
+          set((state) => {
+            const updated = state.notifications.map((n) => ({ ...n, isRead: true }));
+            return {
+              notifications: updated,
+              unreadCount: 0,
+            };
+          });
+        } catch (error) {
+          // Optionally handle error (e.g., show toast)
+        }
       },
 
-      clearAll: () => {
-        set({ notifications: [], unreadCount: 0 });
+      clearAll: async () => {
+        try {
+          await clearAllNotifications();
+          set({ notifications: [], unreadCount: 0 });
+        } catch (error) {
+          // Optionally handle error (e.g., show toast)
+        }
       },
 
       deleteNotification: (notificationId) => {
         set((state) => {
-          const updated = state.notifications.filter((n) => n.notificationId !== notificationId);
+          const updated = state.notifications.filter(
+            (n) => n.notificationId !== notificationId
+          );
           return {
             notifications: updated,
             unreadCount: updated.filter((n) => !n.isRead).length,
