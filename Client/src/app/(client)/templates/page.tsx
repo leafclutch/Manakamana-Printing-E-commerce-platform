@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { notify } from "@/utils/notifications";
+import Link from "next/link";
 import { FiUploadCloud, FiGrid, FiEdit3, FiChevronRight } from "react-icons/fi";
 import Image from "next/image";
 import { useDesignStore } from "@/store/designStore";
@@ -158,17 +159,28 @@ export default function TemplatesPage() {
     return (
         <div className="p-4 sm:p-6 md:p-8 lg:p-10">
             {/* Page Header */}
-            <div className="text-center pb-2 mb-8">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">Design Centre</h2>
-                <div className="h-[4px] mt-3 rounded-full w-20 sm:w-28 md:w-32 bg-blue-500 my-4 mx-auto" />
-                <p className="max-w-full md:max-w-xl text-center mx-auto text-[#64748b] text-[0.93rem] md:text-[0.875rem] mt-1.5">
-                    Browse our free professional templates or submit your own custom design to get started.
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-[0.7rem] font-semibold tracking-[0.08em] text-[#94a3b8] uppercase">
-                    <span>Home</span>
-                    <span>/</span>
-                    <span className="text-[#1a56db]">Design Centre</span>
+                <div className="flex flex-col items-center justify-center mb-8 relative">
+                    <div className="w-full flex justify-end mb-2">
+                        <Link
+                            href="/templates/history"
+                            className="flex items-center gap-2 px-6 py-3 border-2 border-[#1a56db] text-[#1a56db] hover:bg-[#1a56db] hover:text-white text-sm font-bold rounded-xl transition-all shadow-sm active:scale-95"
+                        >
+                            View Design History
+                        </Link>
+                    </div>
+                    <div className="flex flex-col items-center w-full">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center">Design Centre</h2>
+                        <div className="h-[4px] mt-3 rounded-full w-20 sm:w-28 md:w-32 bg-blue-500 my-4 mx-auto" />
+                        <p className="max-w-full md:max-w-xl text-[#64748b] text-[0.93rem] md:text-[0.875rem] mt-1.5 text-center">
+                            Browse our free professional templates or submit your own custom design to get started.
+                        </p>
+                    </div>
                 </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-[0.7rem] font-semibold tracking-[0.08em] text-[#94a3b8] uppercase mb-8">
+                <span>Home</span>
+                <span>/</span>
+                <span className="text-[#1a56db]">Design Centre</span>
             </div>
 
             {/* Two-column layout: Sidebar + Content */}

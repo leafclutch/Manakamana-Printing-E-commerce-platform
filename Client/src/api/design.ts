@@ -18,8 +18,8 @@ export const submitDesignApi = async (formData:FormData): Promise<any> => {
 export const getAllDesign = async () => {
     try {
         const response = await api.get(`/v1/design-submissions/my`);
-        console.log(response.data);
-        return response.data.data;
+        console.log(response.data.data.items);
+        return response.data.data.items;
     } catch (error) {
         throw error;
     }

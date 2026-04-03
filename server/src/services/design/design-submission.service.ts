@@ -51,6 +51,7 @@ export const getMySubmissionsService = async (options: {
       where,
       include: {
         template: { select: { id: true, title: true } },
+        approvedDesign: { select: { id: true, designCode: true } },
       },
       skip: (page - 1) * limit,
       take: limit,

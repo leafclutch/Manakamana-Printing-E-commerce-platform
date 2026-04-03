@@ -85,11 +85,14 @@ export const getMySubmissions = async (req: Request, res: Response) => {
       title: i.title,
       status: i.status,
       template: i.template ? { id: i.template.id, title: i.template.title } : null,
+      approvedDesign: i.approvedDesign
+        ? { id: i.approvedDesign.id, designCode: i.approvedDesign.designCode }
+        : null,
       submittedAt: i.submittedAt,
       feedbackMessage: i.feedbackMessage,
       approvedDesignId: i.approvedDesignId,
     }));
-
+    
     res.status(200).json({
       success: true,
       data: {

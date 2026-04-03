@@ -6,16 +6,20 @@ import { persist } from "zustand/middleware";
 export type DesignStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface Design {
-    id: string;
-    designCode: string;
-    clientId: string;
-    fileUrl: string;
-    previewUrl: string | null;
+    submissionId: string;
+    title: string;
     status: DesignStatus;
-    rejectionReason: string | null;
-    reviewedById: string | null;
-    createdAt: string;
-    reviewedAt: string | null;
+    template: {
+        id: string;
+        title: string;
+    };
+    approvedDesign?: {
+        id: string;
+        designCode: string;
+    } | null;
+    submittedAt: string;
+    feedbackMessage: string | null;
+    approvedDesignId: string | null;
 }
 
 export interface DesignStoreState {
@@ -40,7 +44,7 @@ export const useDesignStore = create<DesignStoreState>()(
                 set({ loading: true, error: null });
                 try {
                     const data = await getAllDesign()
-                    set({ designs: data, error: null });
+                    set({ designs: Array.isArray(data) ? data : [], error: null });
                 } catch (error: any) {
                     set({ error: error?.message || "Failed to fetch designs" });
                 } finally {
@@ -85,7 +89,7 @@ export const useDesignStore = create<DesignStoreState>()(
             //     }
             // },
 
-            verifyDesign: async (designCode: string, newPreviewUrl?: string) => {
+            verifyDesign: async (designCode: string) => {
                 set({ loading: true, error: null });
                 try {
                     await verifyDesign(designCode);
